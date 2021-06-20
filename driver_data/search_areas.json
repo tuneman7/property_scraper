@@ -1,0 +1,93 @@
+{
+  "property_searches": [
+          {
+            "realtor.com": [
+              {
+                "median_list_price": "",
+                "median_list_price_up_down": "",
+                "median_price_per_sqft": "",
+                "median_price_per_sqft_up_down": "",
+                "median_days_on_market": "",
+                "median_days_on_market_up_down": "",
+                "active_listings": "",
+                "active_listings_up_down": "",
+                "extract_dt": "",
+                "zipcode": "90068",
+                "search_uri": "https://www.redfin.com/zipcode/90068",
+                "description": "Hollywood Hills"
+              },
+              {
+                "median_list_price": "",
+                "median_list_price_up_down": "",
+                "median_price_per_sqft": "",
+                "median_price_per_sqft_up_down": "",
+                "median_days_on_market": "",
+                "median_days_on_market_up_down": "",
+                "active_listings": "",
+                "active_listings_up_down": "",
+                "extract_dt": "",
+                "zipcode": "90027",
+                "search_uri": "https://www.realtor.com/realestateandhomes-search/90027/type-single-family-home,multi-family-home,condo,townhome/sby-1",
+                "description": "East Hollywood / Los Feliz"
+              },
+              {
+                "median_list_price": "",
+                "median_list_price_up_down": "",
+                "median_price_per_sqft": "",
+                "median_price_per_sqft_up_down": "",
+                "median_days_on_market": "",
+                "median_days_on_market_up_down": "",
+                "active_listings": "",
+                "active_listings_up_down": "",
+                "extract_dt": "",
+                "zipcode": "90038",
+                "search_uri": "https://www.realtor.com/realestateandhomes-search/90038/type-single-family-home,multi-family-home,condo,townhome/sby-1",
+                "description": "Hollywood South"
+              },
+              {
+                "median_list_price": "",
+                "median_list_price_up_down": "",
+                "median_price_per_sqft": "",
+                "median_price_per_sqft_up_down": "",
+                "median_days_on_market": "",
+                "median_days_on_market_up_down": "",
+                "active_listings": "",
+                "active_listings_up_down": "",
+                "extract_dt": "",
+                "zipcode": "90046",
+                "search_uri": "https://www.realtor.com/realestateandhomes-search/90046/type-single-family-home,multi-family-home,condo,townhome/sby-1",
+                "description": "Hollywood West Adjacent"
+              },
+              {
+                "median_list_price": "",
+                "median_list_price_up_down": "",
+                "median_price_per_sqft": "",
+                "median_price_per_sqft_up_down": "",
+                "median_days_on_market": "",
+                "median_days_on_market_up_down": "",
+                "active_listings": "",
+                "active_listings_up_down": "",
+                "extract_dt": "",
+                "zipcode": "90028",
+                "search_uri": "https://www.realtor.com/realestateandhomes-search/90028/type-single-family-home,multi-family-home,condo,townhome/sby-1",
+                "description": "Hollywood"
+              },
+              {
+                "median_list_price": "",
+                "median_list_price_up_down": "",
+                "median_price_per_sqft": "",
+                "median_price_per_sqft_up_down": "",
+                "median_days_on_market": "",
+                "median_days_on_market_up_down": "",
+                "active_listings": "",
+                "active_listings_up_down": "",
+                "extract_dt": "",
+                "zipcode": "90028",
+                "search_uri": "https://www.realtor.com/realestateandhomes-search/90028/type-single-family-home,multi-family-home,condo,townhome/sby-1",
+                "description": "Hollywood"
+              }
+
+            ]
+          }
+      ]
+    }
