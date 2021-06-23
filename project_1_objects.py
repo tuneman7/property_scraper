@@ -29,6 +29,20 @@ class AreaDataStore:
         self.area_name_by_zipcode = {}
         self.load_area_data_objects()
 
+    #remove later
+    def scrub_and_save_file(self,json_object):
+        if(len(json_object.median_list_price)==3):
+                json_object.median_list_price = json_object.median_list_price + ",000"
+        thisdir = os.getcwd()
+        fileToSave = thisdir + '\\historical_data_scrubbed\\' + json_object.extract_day_id + '\\{}_extract_{}.json'.format(json_object.zipcode,json_object.extract_day_id)
+        daydirectory = thisdir + '\\historical_data_scrubbed\\' + json_object.extract_day_id + '\\'
+        if not os.path.exists(daydirectory):
+            os.makedirs(daydirectory)
+
+        with open(fileToSave,"w") as outfile:
+            json.dump(json_object.__dict__,outfile,indent=4,sort_keys=True)
+
+
     def load_area_data_objects(self):
         this_dir = os.getcwd()
         historical_data_dir = this_dir + '\\historical_data\\'
@@ -47,6 +61,7 @@ class AreaDataStore:
                     file_name = day_id_directory + '\\' + json_file
                     file_data = self.get_data_from_file(file_name)
                     zip_code_by_day_id_data_object = AreaInformationByZipcode(file_data)
+                    # self.scrub_and_save_file(zip_code_by_day_id_data_object)
                     # print("zipcode = ", zip_code_by_day_id_data_object.zipcode, zip_code_by_day_id_data_object.extract_day_id)
                     l_area_data_by_zipcode.append((zip_code_by_day_id_data_object))
                     zip_code_set.add(zip_code)
