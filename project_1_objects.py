@@ -2,7 +2,7 @@ import os
 import sys
 import json
 from datetime import datetime
-
+import matplotlib.pyplot as plt
 class AreaInformationByZipcode:
 
     def __init__(self,**kwargs):
@@ -127,6 +127,29 @@ class AreaDataMenu:
             to_print = " "*int(10) + to_print
             print(to_print)
             int_menu+=1
-# class AreaDisplay:
+
+class AreaDisplay:
+
+    def __init__(self):
+        self.area_data_store = AreaDataStore()
+
+    def plot_the_dealio(self):
+
+        y_axis_values = []
+        x_axis_values = []
+
+        for object in self.area_data_store.get_area_info_by_zipcode("90068"):
+            y_axis_values.append(int(object.active_listings.replace(",","")))
+            x_axis_values.append(object.extract_day_id)
+            print(object.median_list_price,object.extract_day_id)
+
+        plt.plot(x_axis_values,y_axis_values)
+
+        plt.xlabel("Day")
+        plt.ylabel("Active Listing Count")
+        plt.title("Dealio")
+        plt.xticks(rotation=90)
+        plt.show()
+
 #
 # class AreaGraph:
