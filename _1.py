@@ -57,7 +57,7 @@ def LoadPropertySearchInfo():
 
 
 def PerformPropertySearchSaveResults(objMyPropertySearchInfo):
-    objMyPropertySearchInfo.PrintInternalDictionary()
+    objMyPropertySearchInfo.print_internal_directory()
     thisdir = os.getcwd()
     chromedirver = thisdir + '\\chromedriver\\chromedriver.exe'
     driver = webdriver.Chrome(executable_path=chromedirver)

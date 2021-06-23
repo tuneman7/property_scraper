@@ -89,9 +89,9 @@ def LoadPropertySearchInfo():
 
 
 def PerformPropertySearchSaveResults(objMyPropertySearchInfo):
-    objMyPropertySearchInfo.PrintInternalDictionary()
+    objMyPropertySearchInfo.print_internal_directory()
 
-    if objMyPropertySearchInfo.FileSavedForToday():
+    if objMyPropertySearchInfo.file_saved_for_today():
         return
 
     thisdir = os.getcwd()
@@ -107,12 +107,12 @@ def PerformPropertySearchSaveResults(objMyPropertySearchInfo):
     elem = None
     listing_count = ""
     try:
-        elem = driver.find_element_by_xpath("/html/body/div[1]/div[3]/section[1]/section[2]/div[2]/section[2]/div/div[2]/div[1]/span/span")
-        listing_count = elem.text
+        elem = driver.find_element_by_xpath("/html/body/div[1]/div[3]/section[1]/section[2]/div[2]/section[7]/div/p")
     except:
         try:
             elem = driver.find_element_by_xpath("/html/body/div[1]/div[3]/section[1]/section[2]/div[2]/section[1]/div/div[2]/div[1]/span/span/")
             listing_count = elem.text
+
         except:
             fido="dido"
     try:
@@ -215,7 +215,7 @@ def PerformPropertySearchSaveResults(objMyPropertySearchInfo):
 
     driver.close()
 
-    objMyPropertySearchInfo.SaveTodaysDataFile()
+    objMyPropertySearchInfo.save_todays_data_file()
 
 
 
@@ -230,6 +230,16 @@ def main():
         #searchObject.PrintInternalDictionary()
 
 main()
+
+
+
+
+searchObject.PrintInternalDictionary()
+
+main()
+
+
+
 
 
 
