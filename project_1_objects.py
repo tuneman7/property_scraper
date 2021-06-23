@@ -99,7 +99,7 @@ class AreaDataMenu:
 
     def __init__(self):
         self.area_data_store = AreaDataStore()
-        self.display_area_data_menu()
+        # self.display_area_data_menu()
 
     def display_area_data_menu(self,error_of_input=False,input_value=None):
         os.system("cls")
@@ -176,9 +176,8 @@ class AreaDisplay:
         self.area_data_store = AreaDataStore()
         self.zip_code = input_zip_code
         print("self.zip_code = ",self.zip_code)
-        self.display_area_data_menu()
-        
-    def display_area_data_menu(self):
+
+    def display_area_data_menu(self,input_is_valid=True,input_value=""):
         os.system("cls")
         max_key = max(self.area_data_store.area_name_by_zipcode, key=lambda k: len(self.area_data_store.area_name_by_zipcode[k]))
         max_len = len(self.area_data_store.area_name_by_zipcode[max_key])
@@ -217,18 +216,23 @@ class AreaDisplay:
             print(to_print)
 
         print(" "*screen_width)
-        print("*"*screen_width)
+        print(" "*screen_width)
 
-        # print(" "*screen_width)
-        #
-        # print("*"*screen_width)
-        # title1 = "*  Enter a number corresponding to the zipcode you wish to view or 'quit' *"
-        # print(title1)
-        #
-        # print("*"*screen_width)
-        # print(" "*screen_width)
-        # if error_of_input:
-        #     self.get_main_menu_input(error_of_input,input_value)
+        print("*"*screen_width)
+        print(self.center_with_stars("Please enter the number of the graph to view.",screen_width))
+        print(self.center_with_stars("Or enter 'return' to return to the Home Menu.",screen_width))
+
+        print("*"*screen_width)
+        print(" "*screen_width)
+
+        if not input_is_valid:
+            self.get_area_menu_input(input_is_valid,input_value,menu_dict)
+        else:
+            return_value = self.get_area_menu_input(input_is_valid, None, menu_dict)
+            if return_value is not None:
+                return return_value
+
+
 
     def center_with_stars(self,input_string,screen_width):
         buffer = int((screen_width -len(input_string)-2)/2)
@@ -239,11 +243,11 @@ class AreaDisplay:
         return input_string
         
 
-    def get_area_menu_input(self,error_of_input=False,input_value=None):
+    def get_area_menu_input(self,input_is_valid=True,input_value=None,menu_dict={}):
 
-
+        menu_dict['return']='return'
         
-        if error_of_input:
+        if not input_is_valid:
             print("The input your provided '{}' is not a valid menu choice.".format(input_value))
 
         good_input=False
@@ -251,13 +255,10 @@ class AreaDisplay:
             good_input = True
             my_input = input("Please make your selection:").lower()
             if my_input not in menu_dict.keys():
-                self.display_area_data_menu(True,my_input)
+                self.display_area_data_menu(False,my_input)
+            else:
+                return my_input, menu_dict[my_input]
 
-        if my_input == "quit":
-            print("Quitting -- goodbye.")
-            sys.exit()
-        else:
-            return menu_dict[my_input]
 
 
 

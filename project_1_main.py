@@ -13,9 +13,21 @@ def main():
     #     print(object.zipcode,object.extract_day_id)
     # # print(area_data_store.area_data_objects_by_zipcode)
     area_data_menu = AreaDataMenu()
-    zip_code_to_display = area_data_menu.get_main_menu_input()
-    area_display = AreaDisplay(zip_code_to_display)
 
+
+    stil_running = True
+    while stil_running:
+
+        area_data_menu.display_area_data_menu(False,None)
+        zip_code_to_display = area_data_menu.get_main_menu_input()
+        area_display_object = AreaDisplay(zip_code_to_display)
+        area_display_option = area_display_object.display_area_data_menu()
+
+        if area_display_option[0] == 'return':
+            continue
+        else:
+            print(area_display_option)
+            stil_running = False
 
     # area_display.plot_the_dealio()
 
