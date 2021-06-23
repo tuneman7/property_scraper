@@ -3,6 +3,7 @@ import sys
 import json
 from datetime import datetime
 import matplotlib.pyplot as plt
+
 class AreaInformationByZipcode:
 
     def __init__(self,**kwargs):
@@ -100,20 +101,27 @@ class AreaDataMenu:
         self.area_data_store = AreaDataStore()
         self.display_area_data_menu()
 
-    def display_area_data_menu(self):
+    def display_area_data_menu(self,error_of_input=False,input_value=None):
         os.system("cls")
         max_key = max(self.area_data_store.area_name_by_zipcode, key=lambda k: len(self.area_data_store.area_name_by_zipcode[k]))
         max_len = len(self.area_data_store.area_name_by_zipcode[max_key])
-        screen_width = 75
+        screen_width = 76
         title = "*        U.C. Berkeley MIDS Summer 2021 W200 Project 1 -- Don Irwin       *"
         print()
         print("*"*screen_width)
         print(title.center(screen_width))
         print("*"*screen_width)
-        title1 = "*             Real Estate Information by Zip Code System                  *"
+        title1 = "*             Real Estate Market Info by Zip Code System                  *"
         print(title1)
 
         print("*"*screen_width)
+        print("*"*screen_width)
+        title1 = "*                            HOME MENU                                    *"
+        print(title1)
+
+        print("*"*screen_width)
+        print(" "*screen_width)
+
         print(" "*screen_width)
 
         int_menu = 1
@@ -124,24 +132,148 @@ class AreaDataMenu:
                 to_print = "{}. {} : {}".format(int_menu, zip_code,
                                                  self.area_data_store.area_name_by_zipcode[zip_code])
             # side_buffer = (len(to_print)-screen_width)/2
-            to_print = " "*int(10) + to_print
+            to_print = " "*int(5) + to_print
             print(to_print)
             int_menu+=1
+        print(" "*screen_width)
+
+        print("*"*screen_width)
+        title1 = "*  Enter a number corresponding to the zipcode you wish to view or 'quit' *"
+        print(title1)
+
+        print("*"*screen_width)
+        print(" "*screen_width)
+        if error_of_input:
+            self.get_main_menu_input(error_of_input,input_value)
+
+    def get_main_menu_input(self,error_of_input=False,input_value=None):
+
+        menu_dict = {str(list(self.area_data_store.area_name_by_zipcode).index(zip_code)+1):zip_code for zip_code in self.area_data_store.area_name_by_zipcode.keys()}
+        menu_dict['quit']=""
+        if error_of_input:
+            print("The input your provided '{}' is not a valid menu choice.".format(input_value))
+
+        good_input=False
+        while not good_input:
+            good_input = True
+            my_input = input("Please make your selection:").lower()
+            if my_input not in menu_dict.keys():
+                self.display_area_data_menu(True,my_input)
+
+        if my_input == "quit":
+            print("Quitting -- goodbye.")
+            sys.exit()
+        else:
+            return menu_dict[my_input]
+
+
+
 
 class AreaDisplay:
+
+
+    def __init__(self,input_zip_code):
+        self.area_data_store = AreaDataStore()
+        self.zip_code = input_zip_code
+        print("self.zip_code = ",self.zip_code)
+        self.display_area_data_menu()
+        
+    def display_area_data_menu(self):
+        os.system("cls")
+        max_key = max(self.area_data_store.area_name_by_zipcode, key=lambda k: len(self.area_data_store.area_name_by_zipcode[k]))
+        max_len = len(self.area_data_store.area_name_by_zipcode[max_key])
+        screen_width = 76
+        
+        print("*"*screen_width)
+        print(self.center_with_stars("U.C. Berkeley MIDS Summer 2021 W200 Project 1 -- Don Irwin",screen_width))
+        print("*"*screen_width)
+        print(self.center_with_stars("Real Estate Market Info by Zip Code System",screen_width))
+        print("*"*screen_width)
+
+        print(self.center_with_stars("AREA DETAILS MENU ".format(self.zip_code),screen_width))
+ 
+        print(self.center_with_stars("You have selected zip code {}".format(self.zip_code),screen_width))
+        print(self.center_with_stars("Area Name: {}".format(self.area_data_store.area_name_by_zipcode[self.zip_code]),screen_width))
+
+        print("*"*screen_width)
+        print(" "*screen_width)
+        print(" "*screen_width)
+
+        menu_dict = {}
+        menu_dict['1']="Graph Median Home Price"
+        menu_dict['2']="Graph Listings in Market"
+        menu_dict['3']="Graph Daily Price Reductions"
+        menu_dict['4']="Graph Price Per Squre Foot"
+        menu_dict['5']="Graph All"
+
+
+        for option in menu_dict.keys():
+            if(int(option)<10):
+                to_print = "{}.  : {}".format(option,menu_dict[option])
+            else:
+                to_print = "{}. : {}".format(option,menu_dict[option])
+            # side_buffer = (len(to_print)-screen_width)/2
+            to_print = " "*int(20) + to_print
+            print(to_print)
+
+        print(" "*screen_width)
+        print("*"*screen_width)
+
+        # print(" "*screen_width)
+        #
+        # print("*"*screen_width)
+        # title1 = "*  Enter a number corresponding to the zipcode you wish to view or 'quit' *"
+        # print(title1)
+        #
+        # print("*"*screen_width)
+        # print(" "*screen_width)
+        # if error_of_input:
+        #     self.get_main_menu_input(error_of_input,input_value)
+
+    def center_with_stars(self,input_string,screen_width):
+        buffer = int((screen_width -len(input_string)-2)/2)
+        input_string = "*" + " " *buffer+ input_string +" "*buffer+"*"
+        if(len(input_string)<screen_width):
+            input_string.replace(" *","  *")
+        # print(len(input_string))    
+        return input_string
+        
+
+    def get_area_menu_input(self,error_of_input=False,input_value=None):
+
+
+        
+        if error_of_input:
+            print("The input your provided '{}' is not a valid menu choice.".format(input_value))
+
+        good_input=False
+        while not good_input:
+            good_input = True
+            my_input = input("Please make your selection:").lower()
+            if my_input not in menu_dict.keys():
+                self.display_area_data_menu(True,my_input)
+
+        if my_input == "quit":
+            print("Quitting -- goodbye.")
+            sys.exit()
+        else:
+            return menu_dict[my_input]
+
+
+
+
+
+class AreaGraph:
 
     def __init__(self):
         self.area_data_store = AreaDataStore()
 
+
     def plot_the_dealio(self):
 
-        y_axis_values = []
-        x_axis_values = []
 
-        for object in self.area_data_store.get_area_info_by_zipcode("90068"):
-            y_axis_values.append(int(object.active_listings.replace(",","")))
-            x_axis_values.append(object.extract_day_id)
-            print(object.median_list_price,object.extract_day_id)
+        y_axis_values = [int(object.median_price_per_sqft.replace(",","")) for object in self.area_data_store.get_area_info_by_zipcode("90023")]
+        x_axis_values = [object.extract_day_id for object in self.area_data_store.get_area_info_by_zipcode("90023")]
 
         plt.plot(x_axis_values,y_axis_values)
 
@@ -151,5 +283,3 @@ class AreaDisplay:
         plt.xticks(rotation=90)
         plt.show()
 
-#
-# class AreaGraph:
