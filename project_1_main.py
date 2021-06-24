@@ -20,10 +20,10 @@ def main():
     # area_graph.plot_the_dealio()
 
     #
+    area_data_menu = AreaDataMenu()
     stil_running = True
     while stil_running:
 
-        area_data_menu = AreaDataMenu()
         area_data_menu.display_area_data_menu()
         zip_code_to_display = area_data_menu.get_main_menu_input()
         area_display_object = AreaDisplay(zip_code_to_display)

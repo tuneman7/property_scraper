@@ -6,12 +6,15 @@ import matplotlib.pyplot as plt
 from os import system, name
 from time import sleep
 import copy
+import threading
+
+GLOBAL_DATA_STORE = None
 
 class Utility:
 
     def __init__(self):
         self.bozo ="bozo"
-
+        self.screen_width = 76
     # define our clear function
     def clear(self):
 
@@ -23,6 +26,28 @@ class Utility:
         else:
             _ = system('clear')
 
+    def raw_input_with_timeout(self,prompt, timeout=30.0,valid_inputs=None,default_value=1):
+        print(prompt, end=' ')
+        timer = threading.Timer(timeout, threading.interrupt_main)
+        astring = None
+        try:
+            timer.start()
+            astring = input(prompt)
+            if valid_inputs is not None and astring not in valid_inputs:
+                valid_inputs=False
+                while not valid_inputs:
+                    print("The value entered '{}' is not a valid menu option.".format(astring))
+                    astring = input(prompt)
+                    if astring in valid_inputs:
+                        valid_inputs = True
+        except KeyboardInterrupt:
+            pass
+        timer.cancel()
+        if astring is None:
+            return default_value
+        else:
+            return astring
+
     def center_with_stars(self,input_string,screen_width):
         buffer = int((screen_width -len(input_string)-2)/2)
         input_string = "*" + " " *buffer+ input_string +" "*buffer+"*"
@@ -31,6 +56,21 @@ class Utility:
         # print(len(input_string))    
         return input_string
 
+    def print_header(self):
+        print("*"*self.screen_width)
+        print(self.center_with_stars("U.C. Berkeley MIDS Summer 2021 W200 Project 1 -- Don Irwin",self.screen_width))
+        print("*"*self.screen_width)
+        print(self.center_with_stars("Real Estate Market Info by Zip Code System",self.screen_width))
+        print("*"*self.screen_width)
+
+    def get_data_from_file(self,str_file_name):
+        with open(str_file_name, 'r') as file:
+            data = file.read()
+
+        return data
+    def get_this_dir(self):
+        thisdir = os.getcwd()
+        return thisdir
 
 class AreaInformationByZipcode:
 
@@ -49,10 +89,14 @@ class AreaDataStore:
 
     beginning_day_id = "20210318"
     ending_day_id = "20210606"
+    smooth_data_dir = "historical_data"
+    rough_data_dir = "historical_data_original_do_not_delete"
 
-
-    def __init__(self):
-
+    def __init__(self,use_rough_data=False):
+        if use_rough_data:
+            self.data_directory = AreaDataStore.rough_data_dir
+        else:
+            self.data_directory = AreaDataStore.smooth_data_dir
         self.area_data_objects_by_zipcode = {}
         self.area_name_by_zipcode = {}
         self.util = Utility()
@@ -193,7 +237,7 @@ class AreaDataStore:
     def load_area_data_objects(self):
         this_dir = os.getcwd()
         historical_data_dir = this_dir + '\\historical_data\\'
-        historical_data_dir = os.path.join(this_dir, 'historical_data')
+        historical_data_dir = os.path.join(this_dir, self.data_directory)
 
         print(this_dir)
         day_id_dirs = [day_id_directory for day_id_directory in os.listdir(historical_data_dir) ]
@@ -215,7 +259,7 @@ class AreaDataStore:
                     zip_code = json_file.split('_')[0]
                     file_name = day_id_directory + '\\' + json_file
                     file_name = os.path.join(day_id_directory,json_file)
-                    file_data = self.get_data_from_file(file_name)
+                    file_data = self.util.get_data_from_file(file_name)
                     zip_code_by_day_id_data_object = AreaInformationByZipcode(file_data)
                     # self.scrub_and_save_file(zip_code_by_day_id_data_object)
                     # print("zipcode = ", zip_code_by_day_id_data_object.zipcode, zip_code_by_day_id_data_object.extract_day_id)
@@ -242,35 +286,76 @@ class AreaDataStore:
         l_return = [self.area_data_objects_by_zipcode[zip_code][key] for key in self.area_data_objects_by_zipcode[zip_code].keys()]
         return l_return
 
-
-    def get_data_from_file(self,str_file_name):
-        with open(str_file_name, 'r') as file:
-            data = file.read()
-
-        return data
-
-
 class AreaDataMenu:
 
     def __init__(self):
-        self.area_data_store = AreaDataStore()
-        # self.display_area_data_menu()
         self.util = Utility()
+        self.display_splash_screen()
+        # self.display_area_data_menu()
+        self.first_time_display=True
+
+        data_store_selection = self.display_data_source_menu()
+        if data_store_selection == '1':
+            global_data_store = AreaDataStore()
+        else:
+            use_rough_data = True
+            global_data_store = AreaDataStore(use_rough_data)
+
+        global GLOBAL_DATA_STORE
+        GLOBAL_DATA_STORE = global_data_store
+        self.area_data_store = GLOBAL_DATA_STORE
+        self.display_area_data_menu()
+
+
+    def display_splash_screen(self):
+        self.util.clear()
+        splash_file = os.path.join(self.util.get_this_dir(),'splash_text.txt')
+        print(self.util.get_data_from_file(splash_file))
+        sleep(2)
+
+    def display_data_source_menu(self):
+        self.util.clear()
+        self.util.print_header()
+        self.util.center_with_stars("DATA SOURCE MENU",76)
+        print("*"*self.util.screen_width)
+        print(" "*self.util.screen_width)
+
+        self.menu_dict = {}
+        self.menu_dict['1']="Smoothed Data (default)"
+        self.menu_dict['2']="Original Rough Data"
+
+
+        for option in self.menu_dict.keys():
+            if(int(option)<10):
+                to_print = "{}.  : {}".format(option,self.menu_dict[option])
+            else:
+                to_print = "{}. : {}".format(option,self.menu_dict[option])
+            # side_buffer = (len(to_print)-screen_width)/2
+            to_print = " "*int(20) + to_print
+            print(to_print)
+
+        print(" "*self.util.screen_width)
+        print(" "*self.util.screen_width)
+
+        print("*"*self.util.screen_width)
+        print(self.util.center_with_stars("Select what data you would like to use.",self.util.screen_width))
+
+        print("*"*self.util.screen_width)
+        print(" "*self.util.screen_width)
+
+        data_type_selection = input("Please make your selection:")
+        while data_type_selection not in self.menu_dict.keys():
+            print("The value you selected {} is not a valid input.".format(data_type_selection))
+            data_type_selection = input("Please make your selection:")
+
+        return data_type_selection
 
     def display_area_data_menu(self,error_of_input=False,input_value=None):
         self.util.clear()
         max_key = max(self.area_data_store.area_name_by_zipcode, key=lambda k: len(self.area_data_store.area_name_by_zipcode[k]))
         max_len = len(self.area_data_store.area_name_by_zipcode[max_key])
         screen_width = 76
-        title = "*        U.C. Berkeley MIDS Summer 2021 W200 Project 1 -- Don Irwin       *"
-        print()
-        print("*"*screen_width)
-        print(title.center(screen_width))
-        print("*"*screen_width)
-        title1 = "*             Real Estate Market Info by Zip Code System                  *"
-        print(title1)
-
-        print("*"*screen_width)
+        self.util.print_header()
         print("*"*screen_width)
         title1 = "*                            HOME MENU                                    *"
         print(title1)
@@ -333,15 +418,13 @@ class AreaDataMenu:
                     good_input = True
                     return menu_dict[my_input]
 
-
-
-
-
 class AreaDisplay:
 
 
     def __init__(self,input_zip_code):
-        self.area_data_store = AreaDataStore()
+        global GLOBAL_DATA_STORE
+        self.area_data_store = GLOBAL_DATA_STORE
+        # self.area_data_store = AreaDataStore()
         self.zip_code = input_zip_code
         self.util = Utility()
 
@@ -350,12 +433,8 @@ class AreaDisplay:
         max_key = max(self.area_data_store.area_name_by_zipcode, key=lambda k: len(self.area_data_store.area_name_by_zipcode[k]))
         max_len = len(self.area_data_store.area_name_by_zipcode[max_key])
         screen_width = 76
-        
-        print("*"*screen_width)
-        print(self.util.center_with_stars("U.C. Berkeley MIDS Summer 2021 W200 Project 1 -- Don Irwin",screen_width))
-        print("*"*screen_width)
-        print(self.util.center_with_stars("Real Estate Market Info by Zip Code System",screen_width))
-        print("*"*screen_width)
+
+        self.util.print_header()
 
         print(self.util.center_with_stars("AREA DETAILS MENU ".format(self.zip_code),screen_width))
  
@@ -450,9 +529,6 @@ class AreaDisplay:
             area_graph = AreaGraph()
             area_graph.plot_single_area_stats(x_axis_values,y_axis_values,"Day",y_label,graph_title)
 
-
-
-
 class AreaGraph:
 
     def __init__(self):
@@ -485,7 +561,7 @@ class AreaGraph:
         plt.xlabel("Day")
         plt.ylabel("Active Listing Count")
         plt.title("Dealio")
-        plt.xticks(x_axis_values[::10],rotation=45)
+        plt.xticks(x_axis_values[::5],rotation=45)
         plt.gcf().subplots_adjust(bottom=0.25)
         plt.show()
 
