@@ -20,7 +20,7 @@ def main():
     # area_graph.plot_the_dealio()
 
     #
-    # stil_running = True
+    stil_running = True
     while stil_running:
 
         area_data_menu = AreaDataMenu()
