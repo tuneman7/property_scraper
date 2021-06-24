@@ -168,7 +168,7 @@ class AreaDataStore:
                 my_day_id = int(day_id)
             except:
                 continue
-            print("day_id=",day_id)
+            # print("day_id=",day_id)
             if not (int(day_id)<int(self.beginning_day_id)) and not (int(day_id)>int(self.ending_day_id)):
                 day_id_directory = historical_data_dir + day_id
                 day_id_directory = os.path.join(historical_data_dir,day_id)
