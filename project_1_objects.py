@@ -67,6 +67,8 @@ class AreaDataStore:
     def load_area_data_objects(self):
         this_dir = os.getcwd()
         historical_data_dir = this_dir + '\\historical_data\\'
+        historical_data_dir = os.path.join(this_dir, 'historical_data')
+
         print(this_dir)
         day_id_dirs = [day_id_directory for day_id_directory in os.listdir(historical_data_dir) ]
 
@@ -76,10 +78,12 @@ class AreaDataStore:
         for day_id in day_id_dirs:
             if not (int(day_id)<int(AreaDataStore.beginning_day_id)) and not (int(day_id)>int(AreaDataStore.ending_day_id)):
                 day_id_directory = historical_data_dir + day_id
+                day_id_directory = os.path.join(historical_data_dir,day_id)
                 json_files = [full_directory for full_directory in os.listdir(day_id_directory) ]
                 for json_file in json_files:
                     zip_code = json_file.split('_')[0]
                     file_name = day_id_directory + '\\' + json_file
+                    file_name = os.path.join(day_id_directory,json_file)
                     file_data = self.get_data_from_file(file_name)
                     zip_code_by_day_id_data_object = AreaInformationByZipcode(file_data)
                     # self.scrub_and_save_file(zip_code_by_day_id_data_object)
