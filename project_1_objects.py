@@ -251,6 +251,8 @@ class AreaDisplay:
             to_print = " "*int(20) + to_print
             print(to_print)
 
+        self.menu_dict['return']='return'
+
         print(" "*screen_width)
         print(" "*screen_width)
 
@@ -281,7 +283,6 @@ class AreaDisplay:
 
     def get_area_menu_input(self):
 
-        self.menu_dict['return']='return'
 
         good_input=False
         while not good_input:
@@ -290,9 +291,12 @@ class AreaDisplay:
             if my_input not in self.menu_dict.keys():
                 self.display_area_data_menu()
                 print("The input your provided '{}' is not a valid menu choice.".format(my_input))
+                good_input = False
                 continue
-            else:
-                return my_input, self.menu_dict[my_input]
+
+
+        return my_input, self.menu_dict[my_input]
+
 
     def display_graph_based_on_input(self,input_tuple,zip_code):
         graph_option = int(input_tuple[0])
