@@ -2,17 +2,23 @@ import os
 import sys
 import json
 from datetime import datetime
-import matplotlib.pyplot as plt
 from os import system, name
 from time import sleep
 import copy
 import threading
-import matplotlib.dates as mdates
+import imp
+
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
+except:
+    pass
 
 GLOBAL_DATA_STORE = None
 
 class Utility:
 
+    screen_width = 76
     def __init__(self):
         self.bozo ="bozo"
         self.screen_width = 76
@@ -28,12 +34,12 @@ class Utility:
             _ = system('clear')
 
 
-    def center_with_stars(self,input_string,screen_width):
+    def center_with_stars(self,input_string,screen_width=76):
         buffer = int((screen_width -len(input_string)-2)/2)
         input_string = "*" + " " *buffer+ input_string +" "*buffer+"*"
         if(len(input_string)<screen_width):
             input_string.replace(" *","  *")
-        # print(len(input_string))    
+        # print(len(input_string))
         return input_string
 
     def print_header(self):
@@ -63,6 +69,30 @@ class Utility:
         splash_file = os.path.join(self.get_this_dir(),'goodbye.txt')
         print(self.get_data_from_file(splash_file))
         sleep(2)
+
+    def do_dependency_check(self):
+        try:
+            exists = imp.find_module("matplotlib")
+            exists = True
+        except:
+            exists = False
+
+        if not exists:
+            self.clear()
+            self.print_header()
+            print(self.center_with_stars("DEPENDENCY MISSING:"))
+            print("")
+            print(self.center_with_stars("This program requires the module 'matplotlib'"))
+            print("")
+            print(            self.center_with_stars(" Please view the link below on how to install: "))
+            print(self.center_with_stars(" https://matplotlib.org/stable/users/installing.html "))
+            print("")
+            print(self.center_with_stars(" Install the missing module, then run the program again. "))
+            print("")
+            print("*"*self.screen_width)
+
+            sys.exit()
+
 
 
 
@@ -284,7 +314,6 @@ class AreaDataMenu:
 
     def __init__(self):
         self.util = Utility()
-        self.util.display_splash_screen()
         # self.display_area_data_menu()
         self.first_time_display=True
 
@@ -434,7 +463,7 @@ class AreaDisplay:
         self.util.print_header()
 
         print(self.util.center_with_stars("AREA DETAILS MENU ".format(self.zip_code),screen_width))
- 
+
         print(self.util.center_with_stars("You have selected zip code {}".format(self.zip_code),screen_width))
         print(self.util.center_with_stars("Area Name: {}".format(self.area_data_store.area_name_by_zipcode[self.zip_code]),screen_width))
 

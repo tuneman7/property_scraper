@@ -4,7 +4,7 @@ from project_1_objects import AreaDataMenu
 from project_1_objects import AreaDisplay
 from project_1_objects import AreaGraph
 from project_1_objects import  AreaInformationByZipcode
-import matplotlib
+from project_1_objects import Utility
 def main():
 
     # import matplotlib
@@ -23,7 +23,10 @@ def main():
     # area_graph = AreaGraph()
     # area_graph.plot_the_dealio()
 
-    #
+    #This will exit us out if we're not cool
+    util = Utility()
+    util.do_dependency_check()
+
     area_data_menu = AreaDataMenu()
     stil_running = True
     while stil_running:
