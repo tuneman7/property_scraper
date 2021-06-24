@@ -27,27 +27,6 @@ class Utility:
         else:
             _ = system('clear')
 
-    def raw_input_with_timeout(self,prompt, timeout=30.0,valid_inputs=None,default_value=1):
-        print(prompt, end=' ')
-        timer = threading.Timer(timeout, threading.interrupt_main)
-        astring = None
-        try:
-            timer.start()
-            astring = input(prompt)
-            if valid_inputs is not None and astring not in valid_inputs:
-                valid_inputs=False
-                while not valid_inputs:
-                    print("The value entered '{}' is not a valid menu option.".format(astring))
-                    astring = input(prompt)
-                    if astring in valid_inputs:
-                        valid_inputs = True
-        except KeyboardInterrupt:
-            pass
-        timer.cancel()
-        if astring is None:
-            return default_value
-        else:
-            return astring
 
     def center_with_stars(self,input_string,screen_width):
         buffer = int((screen_width -len(input_string)-2)/2)
@@ -72,6 +51,20 @@ class Utility:
     def get_this_dir(self):
         thisdir = os.getcwd()
         return thisdir
+
+    def display_splash_screen(self):
+        self.clear()
+        splash_file = os.path.join(self.get_this_dir(),'splash_text.txt')
+        print(self.get_data_from_file(splash_file))
+        sleep(2)
+
+    def displa_exit_screen(self):
+        self.clear()
+        splash_file = os.path.join(self.get_this_dir(),'goodbye.txt')
+        print(self.get_data_from_file(splash_file))
+        sleep(2)
+
+
 
 class AreaInformationByZipcode:
 
@@ -291,7 +284,7 @@ class AreaDataMenu:
 
     def __init__(self):
         self.util = Utility()
-        self.display_splash_screen()
+        self.util.display_splash_screen()
         # self.display_area_data_menu()
         self.first_time_display=True
 
@@ -308,11 +301,6 @@ class AreaDataMenu:
         self.display_area_data_menu()
 
 
-    def display_splash_screen(self):
-        self.util.clear()
-        splash_file = os.path.join(self.util.get_this_dir(),'splash_text.txt')
-        print(self.util.get_data_from_file(splash_file))
-        sleep(2)
 
     def display_data_source_menu(self):
         self.util.clear()
@@ -413,7 +401,8 @@ class AreaDataMenu:
                 continue
             else:
                 if my_input == "quit":
-                    print("Quitting -- goodbye.")
+                    # print("Quitting -- goodbye.")
+                    self.util.displa_exit_screen()
                     sys.exit()
                 else:
                     good_input = True
@@ -470,13 +459,14 @@ class AreaDisplay:
             print(to_print)
 
         self.menu_dict['return']='return'
+        self.menu_dict['quit']='quit'
 
         print(" "*screen_width)
         print(" "*screen_width)
 
         print("*"*screen_width)
         print(self.util.center_with_stars("Please enter the number of the graph to view.",screen_width))
-        print(self.util.center_with_stars("Or enter 'return' to return to the Home Menu.",screen_width))
+        print(self.util.center_with_stars("Enter 'return' to return to the Home Menu, 'quit' to exit.",screen_width))
 
         print("*"*screen_width)
         print(" "*screen_width)
@@ -500,6 +490,10 @@ class AreaDisplay:
                 print("The input your provided '{}' is not a valid menu choice.".format(my_input))
                 good_input = False
                 continue
+
+        if my_input == 'quit':
+            self.util.displa_exit_screen()
+            sys.exit()
 
 
         return my_input, self.menu_dict[my_input]
