@@ -435,13 +435,13 @@ class AreaDisplay:
 
         if graph_option == 2:
 
-            y_axis_values = [int(object.active_listings.replace(",", "")) for object in
+            y_axis_values = [int(object.active_listings) for object in
                              self.area_data_store.get_area_info_by_zipcode(zip_code)]
             y_label = "Active Listings in Zipcode"
 
 
         if graph_option == 3:
-            y_axis_values = [int(object.median_price_per_sqft.replace(",", "")) if len(object.median_price_per_sqft.replace(",", ""))>0 else 0  for object in
+            y_axis_values = [int(object.median_price_per_sqft)  for object in
                              self.area_data_store.get_area_info_by_zipcode(zip_code)]
             y_label = "Median Price Per Sq Ft in Dollars"
 
