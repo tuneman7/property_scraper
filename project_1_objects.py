@@ -7,6 +7,7 @@ from os import system, name
 from time import sleep
 import copy
 import threading
+import matplotlib.dates as mdates
 
 GLOBAL_DATA_STORE = None
 
@@ -509,7 +510,8 @@ class AreaDisplay:
         graph_title = graph_description.replace("Graph","Graph of") + \
                       " For\n" + self.area_data_store.area_name_by_zipcode[zip_code] + \
                       ", Zipcode: {}".format(zip_code)
-        x_axis_values = [object.extract_dt.split(",")[0] for object in self.area_data_store.get_area_info_by_zipcode(zip_code)]
+        # datetime(object.extract_dt.split(",")[0]).date()
+        x_axis_values = [datetime.strptime(object.extract_dt.split(",")[0],'%m/%d/%Y').date()  for object in self.area_data_store.get_area_info_by_zipcode(zip_code)]
         y_label = ""
         if graph_option == 1:
             y_axis_values = [int(object.median_list_price.replace(",", "")) if len(object.median_list_price.replace(",", ""))>0 else 0  for object in
@@ -583,23 +585,34 @@ class AreaGraph:
         plt.xlabel("Day")
         plt.ylabel("Value")
         plt.title("Test")
-        plt.xticks(x_axis_values[::10],rotation=45)
+        # plt.xticks(x_axis_values[::10],rotation=45)
+        plt.xticks(rotation=45)
+        plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
+
         plt.gcf().subplots_adjust(bottom=0.20)
         plt.gcf().subplots_adjust(left=0.25)
+        plt.gcf().autofmt_xdate()
         plt.legend()
         plt.show()
 
 
     def plot_single_area_stats(self,x_axis_values,y_axis_values,x_label,y_label,graph_label):
 
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
+        plt.gca().xaxis.set_major_locator(mdates.DayLocator())
+
         plt.plot(x_axis_values,y_axis_values)
 
         plt.xlabel(x_label)
         plt.ylabel(y_label)
         plt.title(graph_label)
-        plt.xticks(x_axis_values[::10],rotation=45)
+        # plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
+
+        plt.xticks(rotation=45)
+        plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
         plt.gcf().subplots_adjust(bottom=0.20)
         plt.gcf().subplots_adjust(left=0.25)
+        plt.gcf().autofmt_xdate()
 
         plt.show()
 
@@ -609,6 +622,9 @@ class AreaGraph:
 
         y_axis_values = [int(object.median_price_per_sqft.replace(",","")) for object in self.area_data_store.get_area_info_by_zipcode("90023")]
         x_axis_values = [object.extract_day_id for object in self.area_data_store.get_area_info_by_zipcode("90023")]
+
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
+        plt.gca().xaxis.set_major_locator(mdates.DayLocator())
 
         plt.plot(x_axis_values,y_axis_values)
 
