@@ -4,8 +4,12 @@ from project_1_objects import AreaDataMenu
 from project_1_objects import AreaDisplay
 from project_1_objects import AreaGraph
 from project_1_objects import  AreaInformationByZipcode
-
+import matplotlib
 def main():
+
+    # import matplotlib
+    # print('matplotlib: {}'.format(matplotlib.__version__))
+    # return
 
     area_data_store = AreaDataStore()
     # area_data_store.smooth_data()

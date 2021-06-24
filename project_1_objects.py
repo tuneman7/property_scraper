@@ -284,7 +284,7 @@ class AreaDataStore:
         #     object.print_internal_directory()
 
     def get_area_info_by_zipcode(self,zip_code):
-        l_return = [self.area_data_objects_by_zipcode[zip_code][key] for key in self.area_data_objects_by_zipcode[zip_code].keys()]
+        l_return = [self.area_data_objects_by_zipcode[zip_code][key] for key in sorted(self.area_data_objects_by_zipcode[zip_code].keys())]
         return l_return
 
 class AreaDataMenu:
@@ -598,8 +598,11 @@ class AreaGraph:
 
     def plot_single_area_stats(self,x_axis_values,y_axis_values,x_label,y_label,graph_label):
 
+        # print(x_axis_values)
+        # dealio = input("input")
+
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
-        plt.gca().xaxis.set_major_locator(mdates.DayLocator())
+        plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
 
         plt.plot(x_axis_values,y_axis_values)
 
