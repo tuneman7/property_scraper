@@ -5,6 +5,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 from os import system, name
 from time import sleep
+import copy
 
 class Utility:
 
@@ -22,6 +23,14 @@ class Utility:
         else:
             _ = system('clear')
 
+    def center_with_stars(self,input_string,screen_width):
+        buffer = int((screen_width -len(input_string)-2)/2)
+        input_string = "*" + " " *buffer+ input_string +" "*buffer+"*"
+        if(len(input_string)<screen_width):
+            input_string.replace(" *","  *")
+        # print(len(input_string))    
+        return input_string
+
 
 class AreaInformationByZipcode:
 
@@ -36,7 +45,6 @@ class AreaInformationByZipcode:
         for k,v in self.__dict__.items():
             print("{} is \"{}\"".format(k,v))
 
-
 class AreaDataStore:
 
     beginning_day_id = "20210318"
@@ -47,8 +55,78 @@ class AreaDataStore:
 
         self.area_data_objects_by_zipcode = {}
         self.area_name_by_zipcode = {}
-        self.load_area_data_objects()
         self.util = Utility()
+        self.load_area_data_objects()
+
+    #remove later
+    def smooth_data(self):
+        copy_of_area_objects_by_zipcode = copy.deepcopy(self.area_data_objects_by_zipcode)
+        last_median_price = 0
+        for zip_code in self.area_data_objects_by_zipcode.keys():
+            next_zipcode = True
+            day_ids_in_smoothing_step = []
+            for day_id in self.area_data_objects_by_zipcode[zip_code].keys():
+                print(zip_code,day_id,self.area_data_objects_by_zipcode[zip_code][day_id].median_list_price)
+                try:
+                    i_median_price = int(self.area_data_objects_by_zipcode[zip_code][day_id].median_list_price.replace(",",""))
+                except:
+                    i_median_price = 0
+                if last_median_price !=0 and last_median_price != i_median_price:
+                    #print(day_ids_in_smoothing_step)
+                    #we have a change mark the day_id where the change occured
+                    count_in_smoothing_step = len(day_ids_in_smoothing_step)
+                    price_delta = (i_median_price-last_median_price)
+                    if count_in_smoothing_step ==0:
+                        smoothing_step = price_delta
+                    else:
+                        smoothing_step = int(round(price_delta/count_in_smoothing_step))
+
+                    if i_median_price<last_median_price:
+                        smoothing_step = int(round(smoothing_step*(-1)))
+
+
+                    #now do the smoothing
+                    for day_id_to_smooth in day_ids_in_smoothing_step:
+                        my_object = copy_of_area_objects_by_zipcode[zip_code][day_id_to_smooth]
+                        print(zip_code,day_id_to_smooth,my_object.median_list_price,smoothing_step,last_median_price,i_median_price,price_delta,count_in_smoothing_step)
+                    try:
+                         my_object.median_list_price = "{:,}".format((int(my_object.median_list_price.replace(",","")) + smoothing_step))
+                    except:
+                        my_object.median_list_price = my_object.median_list_price
+
+                    copy_of_area_objects_by_zipcode[zip_code][day_id_to_smooth] = my_object
+
+                    # #now clear out the day_ids to smooth
+                    day_ids_in_smoothing_step.clear()
+
+                else:
+                    day_ids_in_smoothing_step.append(self.area_data_objects_by_zipcode[zip_code][day_id].extract_day_id)
+
+                last_median_price = i_median_price
+
+        self.save_smoothed_objects(copy_of_area_objects_by_zipcode)
+
+
+    def save_smoothed_objects(self,copy_of_area_objects_by_zipcode):
+
+        thisdir = os.getcwd()
+
+        for zipcode in copy_of_area_objects_by_zipcode.keys():
+            for day_id in copy_of_area_objects_by_zipcode[zipcode].keys():
+                json_object = copy_of_area_objects_by_zipcode[zipcode][day_id]
+
+                fileToSave = os.path.join( thisdir, 'historical_data_smoothed',  json_object.extract_day_id , '{}_extract_{}.json'.format(json_object.zipcode,json_object.extract_day_id))
+
+                daydirectory = thisdir + '\\historical_data_scrubbed\\' + json_object.extract_day_id + '\\'
+                daydirectory = os.path.join(thisdir,'historical_data_smoothed',  json_object.extract_day_id )
+
+                if not os.path.exists(daydirectory):
+                    os.makedirs(daydirectory)
+                print(fileToSave)
+                with open(fileToSave,"w") as outfile:
+                    json.dump(json_object.__dict__,outfile,indent=4,sort_keys=True)
+
+
 
     #remove later
     def scrub_and_save_file(self,json_object):
@@ -56,7 +134,12 @@ class AreaDataStore:
                 json_object.median_list_price = json_object.median_list_price + ",000"
         thisdir = os.getcwd()
         fileToSave = thisdir + '\\historical_data_scrubbed\\' + json_object.extract_day_id + '\\{}_extract_{}.json'.format(json_object.zipcode,json_object.extract_day_id)
+
+        fileToSave = os.path.join( thisdir, 'historical_data_scrubbed',  json_object.extract_day_id , '{}_extract_{}.json'.format(json_object.zipcode,json_object.extract_day_id))
+
         daydirectory = thisdir + '\\historical_data_scrubbed\\' + json_object.extract_day_id + '\\'
+        daydirectory = os.path.join(thisdir,'historical_data_scrubbed',  json_object.extract_day_id )
+
         if not os.path.exists(daydirectory):
             os.makedirs(daydirectory)
 
@@ -221,15 +304,15 @@ class AreaDisplay:
         screen_width = 76
         
         print("*"*screen_width)
-        print(self.center_with_stars("U.C. Berkeley MIDS Summer 2021 W200 Project 1 -- Don Irwin",screen_width))
+        print(self.util.center_with_stars("U.C. Berkeley MIDS Summer 2021 W200 Project 1 -- Don Irwin",screen_width))
         print("*"*screen_width)
-        print(self.center_with_stars("Real Estate Market Info by Zip Code System",screen_width))
+        print(self.util.center_with_stars("Real Estate Market Info by Zip Code System",screen_width))
         print("*"*screen_width)
 
-        print(self.center_with_stars("AREA DETAILS MENU ".format(self.zip_code),screen_width))
+        print(self.util.center_with_stars("AREA DETAILS MENU ".format(self.zip_code),screen_width))
  
-        print(self.center_with_stars("You have selected zip code {}".format(self.zip_code),screen_width))
-        print(self.center_with_stars("Area Name: {}".format(self.area_data_store.area_name_by_zipcode[self.zip_code]),screen_width))
+        print(self.util.center_with_stars("You have selected zip code {}".format(self.zip_code),screen_width))
+        print(self.util.center_with_stars("Area Name: {}".format(self.area_data_store.area_name_by_zipcode[self.zip_code]),screen_width))
 
         print("*"*screen_width)
         print(" "*screen_width)
@@ -257,8 +340,8 @@ class AreaDisplay:
         print(" "*screen_width)
 
         print("*"*screen_width)
-        print(self.center_with_stars("Please enter the number of the graph to view.",screen_width))
-        print(self.center_with_stars("Or enter 'return' to return to the Home Menu.",screen_width))
+        print(self.util.center_with_stars("Please enter the number of the graph to view.",screen_width))
+        print(self.util.center_with_stars("Or enter 'return' to return to the Home Menu.",screen_width))
 
         print("*"*screen_width)
         print(" "*screen_width)
@@ -272,13 +355,6 @@ class AreaDisplay:
 
 
 
-    def center_with_stars(self,input_string,screen_width):
-        buffer = int((screen_width -len(input_string)-2)/2)
-        input_string = "*" + " " *buffer+ input_string +" "*buffer+"*"
-        if(len(input_string)<screen_width):
-            input_string.replace(" *","  *")
-        # print(len(input_string))    
-        return input_string
         
 
     def get_area_menu_input(self):
