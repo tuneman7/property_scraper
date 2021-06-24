@@ -3,6 +3,25 @@ import sys
 import json
 from datetime import datetime
 import matplotlib.pyplot as plt
+from os import system, name
+from time import sleep
+
+class Utility:
+
+    def __init__(self):
+        self.bozo ="bozo"
+
+    # define our clear function
+    def clear(self):
+
+        # for windows
+        if name == 'nt':
+            _ = system('cls')
+
+        # for mac and linux(here, os.name is 'posix')
+        else:
+            _ = system('clear')
+
 
 class AreaInformationByZipcode:
 
@@ -29,6 +48,7 @@ class AreaDataStore:
         self.area_data_objects_by_zipcode = {}
         self.area_name_by_zipcode = {}
         self.load_area_data_objects()
+        self.util = Utility()
 
     #remove later
     def scrub_and_save_file(self,json_object):
@@ -100,9 +120,10 @@ class AreaDataMenu:
     def __init__(self):
         self.area_data_store = AreaDataStore()
         # self.display_area_data_menu()
+        self.util = Utility()
 
     def display_area_data_menu(self,error_of_input=False,input_value=None):
-        os.system("cls")
+        self.util.clear()
         max_key = max(self.area_data_store.area_name_by_zipcode, key=lambda k: len(self.area_data_store.area_name_by_zipcode[k]))
         max_len = len(self.area_data_store.area_name_by_zipcode[max_key])
         screen_width = 76
@@ -143,8 +164,17 @@ class AreaDataMenu:
 
         print("*"*screen_width)
         print(" "*screen_width)
-        if error_of_input:
-            self.get_main_menu_input(error_of_input,input_value)
+
+        # if error_of_input:
+        #     self.get_main_menu_input(error_of_input,input_value)
+        # else:
+
+        # if error_of_input:
+        #     self.get_main_menu_input(error_of_input,input_value)
+        # else:
+        #     return_value = self.get_main_menu_input(False,None)
+        #     if return_value is not None:
+        #         return return_value
 
     def get_main_menu_input(self,error_of_input=False,input_value=None):
 
@@ -155,16 +185,19 @@ class AreaDataMenu:
 
         good_input=False
         while not good_input:
-            good_input = True
             my_input = input("Please make your selection:").lower()
             if my_input not in menu_dict.keys():
-                self.display_area_data_menu(True,my_input)
+                self.display_area_data_menu()
+                print("The input your provided '{}' is not a valid menu choice.".format(my_input))
+                continue
+            else:
+                if my_input == "quit":
+                    print("Quitting -- goodbye.")
+                    sys.exit()
+                else:
+                    good_input = True
+                    return menu_dict[my_input]
 
-        if my_input == "quit":
-            print("Quitting -- goodbye.")
-            sys.exit()
-        else:
-            return menu_dict[my_input]
 
 
 
@@ -175,10 +208,10 @@ class AreaDisplay:
     def __init__(self,input_zip_code):
         self.area_data_store = AreaDataStore()
         self.zip_code = input_zip_code
-        print("self.zip_code = ",self.zip_code)
+        self.util = Utility()
 
     def display_area_data_menu(self,input_is_valid=True,input_value=""):
-        os.system("cls")
+        self.util.clear()
         max_key = max(self.area_data_store.area_name_by_zipcode, key=lambda k: len(self.area_data_store.area_name_by_zipcode[k]))
         max_len = len(self.area_data_store.area_name_by_zipcode[max_key])
         screen_width = 76
@@ -198,19 +231,18 @@ class AreaDisplay:
         print(" "*screen_width)
         print(" "*screen_width)
 
-        menu_dict = {}
-        menu_dict['1']="Graph Median Home Price"
-        menu_dict['2']="Graph Listings in Market"
-        menu_dict['3']="Graph Daily Price Reductions"
-        menu_dict['4']="Graph Price Per Squre Foot"
-        menu_dict['5']="Graph All"
+        self.menu_dict = {}
+        self.menu_dict['1']="Graph Median Home Price"
+        self.menu_dict['2']="Graph Listings in Market"
+        self.menu_dict['3']="Graph Price Per Squre Foot"
+        self.menu_dict['4']="Graph All"
 
 
-        for option in menu_dict.keys():
+        for option in self.menu_dict.keys():
             if(int(option)<10):
-                to_print = "{}.  : {}".format(option,menu_dict[option])
+                to_print = "{}.  : {}".format(option,self.menu_dict[option])
             else:
-                to_print = "{}. : {}".format(option,menu_dict[option])
+                to_print = "{}. : {}".format(option,self.menu_dict[option])
             # side_buffer = (len(to_print)-screen_width)/2
             to_print = " "*int(20) + to_print
             print(to_print)
@@ -225,12 +257,12 @@ class AreaDisplay:
         print("*"*screen_width)
         print(" "*screen_width)
 
-        if not input_is_valid:
-            self.get_area_menu_input(input_is_valid,input_value,menu_dict)
-        else:
-            return_value = self.get_area_menu_input(input_is_valid, None, menu_dict)
-            if return_value is not None:
-                return return_value
+        # if not input_is_valid:
+        #     self.get_area_menu_input(input_is_valid,input_value,menu_dict)
+        # else:
+        #     return_value = self.get_area_menu_input(input_is_valid, None, menu_dict)
+        #     if return_value is not None:
+        #         return return_value
 
 
 
@@ -243,23 +275,48 @@ class AreaDisplay:
         return input_string
         
 
-    def get_area_menu_input(self,input_is_valid=True,input_value=None,menu_dict={}):
+    def get_area_menu_input(self):
 
-        menu_dict['return']='return'
-        
-        if not input_is_valid:
-            print("The input your provided '{}' is not a valid menu choice.".format(input_value))
+        self.menu_dict['return']='return'
 
         good_input=False
         while not good_input:
             good_input = True
             my_input = input("Please make your selection:").lower()
-            if my_input not in menu_dict.keys():
-                self.display_area_data_menu(False,my_input)
+            if my_input not in self.menu_dict.keys():
+                self.display_area_data_menu()
+                print("The input your provided '{}' is not a valid menu choice.".format(my_input))
+                continue
             else:
-                return my_input, menu_dict[my_input]
+                return my_input, self.menu_dict[my_input]
+
+    def display_graph_based_on_input(self,input_tuple,zip_code):
+        graph_option = int(input_tuple[0])
+        graph_description = input_tuple[1]
+        graph_title = graph_description.replace("Graph","Graph of") + " For\n" + self.area_data_store.area_name_by_zipcode[zip_code]
+        x_axis_values = [object.extract_dt.split(",")[0] for object in self.area_data_store.get_area_info_by_zipcode(zip_code)]
+        y_label = ""
+        if graph_option == 1:
+            y_axis_values = [int(object.median_list_price.replace(",", "")) for object in
+                             self.area_data_store.get_area_info_by_zipcode(zip_code)]
+            y_label = "Median Listing Price in Millions"
+
+        if graph_option == 2:
+
+            y_axis_values = [int(object.active_listings.replace(",", "")) for object in
+                             self.area_data_store.get_area_info_by_zipcode(zip_code)]
+            y_label = "Active Listings in Zipcode"
 
 
+        if graph_option == 3:
+            y_axis_values = [int(object.median_price_per_sqft.replace(",", "")) for object in
+                             self.area_data_store.get_area_info_by_zipcode(zip_code)]
+            y_label = "Median Price Per Sq Ft in Dollars"
+
+
+        if graph_option != 4:
+            area_graph = AreaGraph()
+            area_graph.plot_single_area_stats(x_axis_values,y_axis_values,"Day",y_label,graph_title)
 
 
 
@@ -268,10 +325,23 @@ class AreaGraph:
 
     def __init__(self):
         self.area_data_store = AreaDataStore()
+        self.util = Utility()
+
+
+    def plot_single_area_stats(self,x_axis_values,y_axis_values,x_label,y_label,graph_label):
+
+        plt.plot(x_axis_values,y_axis_values)
+
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        plt.title(graph_label)
+        plt.xticks(x_axis_values[::10],rotation=45)
+        plt.gcf().subplots_adjust(bottom=0.25)
+        plt.show()
 
 
     def plot_the_dealio(self):
-
+        print("in plot the dealio")
 
         y_axis_values = [int(object.median_price_per_sqft.replace(",","")) for object in self.area_data_store.get_area_info_by_zipcode("90023")]
         x_axis_values = [object.extract_day_id for object in self.area_data_store.get_area_info_by_zipcode("90023")]
@@ -281,6 +351,8 @@ class AreaGraph:
         plt.xlabel("Day")
         plt.ylabel("Active Listing Count")
         plt.title("Dealio")
-        plt.xticks(rotation=90)
+        plt.xticks(x_axis_values[::10],rotation=45)
+        plt.gcf().subplots_adjust(bottom=0.25)
         plt.show()
+
 
