@@ -418,6 +418,13 @@ class AreaDataMenu:
                     good_input = True
                     return menu_dict[my_input]
 
+class GraphDataObject:
+
+    def __init__(self):
+        self.x_axis_values = None
+        self.y_axis_values = None
+        self.label = None
+
 class AreaDisplay:
 
 
@@ -480,10 +487,6 @@ class AreaDisplay:
         #     if return_value is not None:
         #         return return_value
 
-
-
-        
-
     def get_area_menu_input(self):
 
 
@@ -500,17 +503,22 @@ class AreaDisplay:
 
         return my_input, self.menu_dict[my_input]
 
-
     def display_graph_based_on_input(self,input_tuple,zip_code):
         graph_option = int(input_tuple[0])
         graph_description = input_tuple[1]
-        graph_title = graph_description.replace("Graph","Graph of") + " For\n" + self.area_data_store.area_name_by_zipcode[zip_code]
+        graph_title = graph_description.replace("Graph","Graph of") + \
+                      " For\n" + self.area_data_store.area_name_by_zipcode[zip_code] + \
+                      ", Zipcode: {}".format(zip_code)
         x_axis_values = [object.extract_dt.split(",")[0] for object in self.area_data_store.get_area_info_by_zipcode(zip_code)]
         y_label = ""
         if graph_option == 1:
             y_axis_values = [int(object.median_list_price.replace(",", "")) if len(object.median_list_price.replace(",", ""))>0 else 0  for object in
                              self.area_data_store.get_area_info_by_zipcode(zip_code)]
-            y_label = "Median Listing Price in Millions"
+            if max(y_axis_values)>1000000:
+                y_label = "Median Listing Price in Millions"
+            else:
+                y_label = "Median Listing Price in Dollars"
+
 
         if graph_option == 2:
 
@@ -524,16 +532,62 @@ class AreaDisplay:
                              self.area_data_store.get_area_info_by_zipcode(zip_code)]
             y_label = "Median Price Per Sq Ft in Dollars"
 
-
+        #Simple single lined graphs.
         if graph_option != 4:
             area_graph = AreaGraph()
             area_graph.plot_single_area_stats(x_axis_values,y_axis_values,"Day",y_label,graph_title)
 
+        #Multi_line_graph
+        if graph_option == 4:
+            lgo = []
+            mpgdo = GraphDataObject()
+            mpgdo.label = "Median Price"
+            mpgdo.x_axis_values = x_axis_values
+            mpgdo.y_axis_values = [int(object.median_list_price.replace(",", "")) if len(object.median_list_price.replace(",", ""))>0 else 0  for object in
+                             self.area_data_store.get_area_info_by_zipcode(zip_code)]
+            lgo.append(mpgdo)
+            algdo = GraphDataObject()
+            algdo.label = "Active Listings"
+            algdo.x_axis_values = x_axis_values
+            algdo.y_axis_values = [int(object.active_listings)*200 for object in
+                             self.area_data_store.get_area_info_by_zipcode(zip_code)]
+            lgo.append(algdo)
+            ppsqftgdo = GraphDataObject()
+            ppsqftgdo.label = "Sqft Price"
+            ppsqftgdo.x_axis_values = x_axis_values
+            ppsqftgdo.y_axis_values = [int(object.median_price_per_sqft)*1000  for object in
+                             self.area_data_store.get_area_info_by_zipcode(zip_code)]
+            lgo.append(ppsqftgdo)
+
+            area_graph = AreaGraph()
+            area_graph.plot_multi_line_graph(lgo)
+            graph_title = "Multi Line Graph" + \
+                          " For\n" + self.area_data_store.area_name_by_zipcode[zip_code] + \
+                          ", Zipcode: {}".format(zip_code)
+
+
 class AreaGraph:
 
     def __init__(self):
-        self.area_data_store = AreaDataStore()
+        global GLOBAL_DATA_STORE
+        self.area_data_store = GLOBAL_DATA_STORE
         self.util = Utility()
+
+    def plot_multi_line_graph(self,list_graph_data_objects):
+
+        x_axis_values = None
+
+        for graph_object in list_graph_data_objects:
+            plt.plot(graph_object.x_axis_values,graph_object.y_axis_values,label=graph_object.label)
+            x_axis_values = graph_object.x_axis_values
+        plt.xlabel("Day")
+        plt.ylabel("Value")
+        plt.title("Test")
+        plt.xticks(x_axis_values[::10],rotation=45)
+        plt.gcf().subplots_adjust(bottom=0.20)
+        plt.gcf().subplots_adjust(left=0.25)
+        plt.legend()
+        plt.show()
 
 
     def plot_single_area_stats(self,x_axis_values,y_axis_values,x_label,y_label,graph_label):
@@ -544,7 +598,7 @@ class AreaGraph:
         plt.ylabel(y_label)
         plt.title(graph_label)
         plt.xticks(x_axis_values[::10],rotation=45)
-        plt.gcf().subplots_adjust(bottom=0.25)
+        plt.gcf().subplots_adjust(bottom=0.20)
         plt.gcf().subplots_adjust(left=0.25)
 
         plt.show()
