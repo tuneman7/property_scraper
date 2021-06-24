@@ -64,6 +64,8 @@ class AreaDataStore:
     def smooth_data(self):
         copy_of_area_objects_by_zipcode = copy.deepcopy(self.area_data_objects_by_zipcode)
         last_median_price = 0
+        last_list_count = 0
+        last_price_per_square_ft = 0
         for zip_code in self.area_data_objects_by_zipcode.keys():
             next_zipcode = True
             day_ids_in_smoothing_step = []
@@ -73,29 +75,63 @@ class AreaDataStore:
                     i_median_price = int(self.area_data_objects_by_zipcode[zip_code][day_id].median_list_price.replace(",",""))
                 except:
                     i_median_price = 0
+                try:
+                    i_list_count = int(self.area_data_objects_by_zipcode[zip_code][day_id].active_listings)
+                except:
+                    i_list_count = 0
+                try:
+                    i_price_per_square_ft = int(self.area_data_objects_by_zipcode[zip_code][day_id].median_price_per_sqft)
+                except:
+                    i_price_per_square_ft = 0
+                print("listing count =", i_list_count,zip_code,day_id)
                 if last_median_price !=0 and last_median_price != i_median_price:
                     #print(day_ids_in_smoothing_step)
                     #we have a change mark the day_id where the change occured
                     count_in_smoothing_step = len(day_ids_in_smoothing_step)
                     price_delta = (i_median_price-last_median_price)
+
+                    listing_delta = (int(i_list_count)-int(last_list_count))
+                    square_feet_delta = (int(i_price_per_square_ft)-int(last_price_per_square_ft))
+
                     if count_in_smoothing_step ==0:
-                        smoothing_step = price_delta
+                        median_price_smoothing_step = price_delta
+                        listing_count_smoothing_step = listing_delta
+                        price_per_square_ft_smoothing_step = square_feet_delta
                     else:
-                        smoothing_step = int(round(price_delta/count_in_smoothing_step))
+                        median_price_smoothing_step = int(round(price_delta/count_in_smoothing_step))
+                        listing_count_smoothing_step = int(round(listing_delta/count_in_smoothing_step))
+                        price_per_square_ft_smoothing_step = int(round(square_feet_delta/count_in_smoothing_step))
 
                     if i_median_price<last_median_price:
-                        smoothing_step = int(round(smoothing_step*(-1)))
+                        median_price_smoothing_step = int(round(median_price_smoothing_step*(-1)))
+                    if i_price_per_square_ft<last_price_per_square_ft:
+                        price_per_square_ft_smoothing_step = int(round(price_per_square_ft_smoothing_step*(-1)))
+
+                    if i_list_count<last_list_count:
+                        listing_count_smoothing_step = int(round(listing_count_smoothing_step*(-1)))
+
+
 
 
                     #now do the smoothing
                     for day_id_to_smooth in day_ids_in_smoothing_step:
                         my_object = copy_of_area_objects_by_zipcode[zip_code][day_id_to_smooth]
-                        print(zip_code,day_id_to_smooth,my_object.median_list_price,smoothing_step,last_median_price,i_median_price,price_delta,count_in_smoothing_step)
+                        print(zip_code,day_id_to_smooth,my_object.median_list_price,median_price_smoothing_step,last_median_price,i_median_price,price_delta,count_in_smoothing_step)
                         original_price = my_object.median_list_price
                         try:
-                             my_object.median_list_price = "{:,}".format((int(my_object.median_list_price.replace(",","")) + smoothing_step))
+                             my_object.median_list_price = "{:,}".format((int(my_object.median_list_price.replace(",","")) + median_price_smoothing_step))
                         except:
                             my_object.median_list_price = my_object.median_list_price
+
+                        try:
+                            my_object.median_price_per_sqft = int(my_object.median_price_per_sqft.replace(",","")) + price_per_square_ft_smoothing_step
+                        except:
+                            my_object.median_price_per_sqft + my_object.median_price_per_sqft
+
+                        try:
+                            my_object.active_listings = int(my_object.active_listings) + listing_count_smoothing_step
+                        except:
+                            my_object.active_listings = my_object.active_listings
 
                         copy_of_area_objects_by_zipcode[zip_code][day_id_to_smooth] = my_object
 
@@ -108,6 +144,8 @@ class AreaDataStore:
                     day_ids_in_smoothing_step.append(self.area_data_objects_by_zipcode[zip_code][day_id].extract_day_id)
 
                 last_median_price = i_median_price
+                last_price_per_square_ft = i_price_per_square_ft
+                last_list_count = i_list_count
 
         self.save_smoothed_objects(copy_of_area_objects_by_zipcode)
 

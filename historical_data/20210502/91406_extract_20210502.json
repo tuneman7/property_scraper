@@ -1,5 +1,5 @@
 {
-    "active_listings": "73",
+    "active_listings": 77,
     "active_listings_up_down": "up",
     "analytics_uri": "https://www.realtor.com/realestateandhomes-search/91406",
     "average_days_on_market": "57",
@@ -9,7 +9,7 @@
     "extract_dt": "05/02/2021, 16:22:19",
     "median_list_price": "769,082",
     "median_list_price_up_down": "down",
-    "median_price_per_sqft": "452",
+    "median_price_per_sqft": 454,
     "median_price_per_sqft_up_down": "up",
     "price_reduced_status": "https://www.redfin.com/zipcode/91406/filter/max-price-reduced=1d",
     "price_reduced_today": 0,

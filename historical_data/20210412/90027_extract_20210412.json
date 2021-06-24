@@ -1,5 +1,5 @@
 {
-    "active_listings": "164",
+    "active_listings": 166,
     "active_listings_up_down": "up",
     "analytics_uri": "https://www.realtor.com/realestateandhomes-search/90027",
     "average_days_on_market": "59",
@@ -9,7 +9,7 @@
     "extract_dt": "04/12/2021, 09:09:43",
     "median_list_price": "1,823,333",
     "median_list_price_up_down": "down",
-    "median_price_per_sqft": "755",
+    "median_price_per_sqft": 757,
     "median_price_per_sqft_up_down": "down",
     "price_reduced_status": "https://www.redfin.com/zipcode/90027/filter/max-price-reduced=1d",
     "price_reduced_today": 0,

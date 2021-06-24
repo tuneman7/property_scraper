@@ -1,5 +1,5 @@
 {
-    "active_listings": "50",
+    "active_listings": 50,
     "active_listings_up_down": "down",
     "analytics_uri": "https://www.realtor.com/realestateandhomes-search/90013",
     "average_days_on_market": "61",
@@ -9,7 +9,7 @@
     "extract_dt": "05/09/2021, 22:02:52",
     "median_list_price": "600,154",
     "median_list_price_up_down": "down",
-    "median_price_per_sqft": "653",
+    "median_price_per_sqft": 655,
     "median_price_per_sqft_up_down": "down",
     "price_reduced_status": "https://www.redfin.com/zipcode/90013/filter/max-price-reduced=1d",
     "price_reduced_today": 0,
