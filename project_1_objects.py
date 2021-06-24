@@ -57,6 +57,8 @@ class AreaDataStore:
         self.area_name_by_zipcode = {}
         self.util = Utility()
         self.load_area_data_objects()
+        self.beginning_day_id = "20210318"
+        self.ending_day_id = "20210606"
 
     #remove later
     def smooth_data(self):
@@ -89,12 +91,15 @@ class AreaDataStore:
                     for day_id_to_smooth in day_ids_in_smoothing_step:
                         my_object = copy_of_area_objects_by_zipcode[zip_code][day_id_to_smooth]
                         print(zip_code,day_id_to_smooth,my_object.median_list_price,smoothing_step,last_median_price,i_median_price,price_delta,count_in_smoothing_step)
-                    try:
-                         my_object.median_list_price = "{:,}".format((int(my_object.median_list_price.replace(",","")) + smoothing_step))
-                    except:
-                        my_object.median_list_price = my_object.median_list_price
+                        original_price = my_object.median_list_price
+                        try:
+                             my_object.median_list_price = "{:,}".format((int(my_object.median_list_price.replace(",","")) + smoothing_step))
+                        except:
+                            my_object.median_list_price = my_object.median_list_price
 
-                    copy_of_area_objects_by_zipcode[zip_code][day_id_to_smooth] = my_object
+                        copy_of_area_objects_by_zipcode[zip_code][day_id_to_smooth] = my_object
+
+                        print("smoothed price=",copy_of_area_objects_by_zipcode[zip_code][day_id_to_smooth].median_list_price,"original price=",original_price)
 
                     # #now clear out the day_ids to smooth
                     day_ids_in_smoothing_step.clear()
@@ -159,7 +164,12 @@ class AreaDataStore:
         zip_code_set = set()
 
         for day_id in day_id_dirs:
-            if not (int(day_id)<int(AreaDataStore.beginning_day_id)) and not (int(day_id)>int(AreaDataStore.ending_day_id)):
+            try:
+                my_day_id = int(day_id)
+            except:
+                continue
+            print("day_id=",day_id)
+            if not (int(day_id)<int(self.beginning_day_id)) and not (int(day_id)>int(self.ending_day_id)):
                 day_id_directory = historical_data_dir + day_id
                 day_id_directory = os.path.join(historical_data_dir,day_id)
                 json_files = [full_directory for full_directory in os.listdir(day_id_directory) ]
