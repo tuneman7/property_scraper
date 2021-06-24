@@ -341,6 +341,8 @@ class AreaGraph:
         plt.title(graph_label)
         plt.xticks(x_axis_values[::10],rotation=45)
         plt.gcf().subplots_adjust(bottom=0.25)
+        plt.gcf().subplots_adjust(left=0.25)
+
         plt.show()
 
 
