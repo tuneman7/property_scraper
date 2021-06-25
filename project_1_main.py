@@ -27,6 +27,8 @@ def main():
     util = Utility()
     util.do_dependency_check()
 
+    util.display_splash_screen()
+
     area_data_menu = AreaDataMenu()
     stil_running = True
     while stil_running:

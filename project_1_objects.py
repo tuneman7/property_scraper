@@ -64,7 +64,7 @@ class Utility:
         print(self.get_data_from_file(splash_file))
         sleep(2)
 
-    def displa_exit_screen(self):
+    def display_exit_screen(self):
         self.clear()
         splash_file = os.path.join(self.get_this_dir(),'goodbye.txt')
         print(self.get_data_from_file(splash_file))
@@ -92,9 +92,6 @@ class Utility:
             print("*"*self.screen_width)
 
             sys.exit()
-
-
-
 
 class AreaInformationByZipcode:
 
@@ -431,7 +428,7 @@ class AreaDataMenu:
             else:
                 if my_input == "quit":
                     # print("Quitting -- goodbye.")
-                    self.util.displa_exit_screen()
+                    self.util.display_exit_screen()
                     sys.exit()
                 else:
                     good_input = True
@@ -521,7 +518,7 @@ class AreaDisplay:
                 continue
 
         if my_input == 'quit':
-            self.util.displa_exit_screen()
+            self.util.display_exit_screen()
             sys.exit()
 
 
@@ -547,7 +544,7 @@ class AreaDisplay:
 
         if graph_option == 2:
 
-            y_axis_values = [int(object.active_listings) for object in
+            y_axis_values = [int(object.active_listings) if len(str(object.active_listings).strip())>0 else 0 for object in
                              self.area_data_store.get_area_info_by_zipcode(zip_code)]
             y_label = "Active Listings in Zipcode"
 
@@ -560,7 +557,7 @@ class AreaDisplay:
         #Simple single lined graphs.
         if graph_option != 4:
             area_graph = AreaGraph()
-            area_graph.plot_single_area_stats(x_axis_values,y_axis_values,"Day",y_label,graph_title)
+            area_graph.plot_single_line_graph(x_axis_values, y_axis_values, "Day", y_label, graph_title)
 
         #Multi_line_graph
         if graph_option == 4:
@@ -574,7 +571,7 @@ class AreaDisplay:
             algdo = GraphDataObject()
             algdo.label = "Active Listings"
             algdo.x_axis_values = x_axis_values
-            algdo.y_axis_values = [int(object.active_listings)*200 for object in
+            algdo.y_axis_values = [int(object.active_listings)*200 if len(str(object.active_listings).strip())>0 else 0 for object in
                              self.area_data_store.get_area_info_by_zipcode(zip_code)]
             lgo.append(algdo)
             ppsqftgdo = GraphDataObject()
@@ -585,10 +582,11 @@ class AreaDisplay:
             lgo.append(ppsqftgdo)
 
             area_graph = AreaGraph()
-            area_graph.plot_multi_line_graph(lgo)
             graph_title = "Multi Line Graph" + \
                           " For\n" + self.area_data_store.area_name_by_zipcode[zip_code] + \
                           ", Zipcode: {}".format(zip_code)
+
+            area_graph.plot_multi_line_graph(lgo,graph_title)
 
 
 class AreaGraph:
@@ -598,7 +596,7 @@ class AreaGraph:
         self.area_data_store = GLOBAL_DATA_STORE
         self.util = Utility()
 
-    def plot_multi_line_graph(self,list_graph_data_objects):
+    def plot_multi_line_graph(self,list_graph_data_objects,title):
 
         x_axis_values = None
 
@@ -607,7 +605,7 @@ class AreaGraph:
             x_axis_values = graph_object.x_axis_values
         plt.xlabel("Day")
         plt.ylabel("Value")
-        plt.title("Test")
+        plt.title(title)
         # plt.xticks(x_axis_values[::10],rotation=45)
         plt.xticks(rotation=45)
         plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
@@ -619,7 +617,7 @@ class AreaGraph:
         plt.show()
 
 
-    def plot_single_area_stats(self,x_axis_values,y_axis_values,x_label,y_label,graph_label):
+    def plot_single_line_graph(self, x_axis_values, y_axis_values, x_label, y_label, graph_label):
 
         # print(x_axis_values)
         # dealio = input("input")
