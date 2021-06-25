@@ -27,15 +27,12 @@ class Utility:
         self.screen_width = 76
     # define our clear function
     def clear(self):
-
         # for windows
         if name == 'nt':
             _ = system('cls')
-
         # for mac and linux(here, os.name is 'posix')
         else:
             _ = system('clear')
-
 
     def center_with_stars(self,input_string,screen_width=76):
         '''
@@ -80,8 +77,6 @@ class Utility:
         '''
         thisdir = os.getcwd()
         return thisdir
-
-
 
     def display_splash_screen(self):
         '''
@@ -129,7 +124,6 @@ class Utility:
             print(self.center_with_stars(" Install the missing module, then run the program again. "))
             print("")
             print("*"*self.screen_width)
-
             sys.exit()
 
 class AreaInformationByZipcode:
@@ -190,11 +184,7 @@ class AreaDataStore:
         Loads all of the data objects into nested dictionaries for consumption by the other classes.
         :return:
         '''
-        this_dir = os.getcwd()
-        historical_data_dir = this_dir + '\\historical_data\\'
-        historical_data_dir = os.path.join(this_dir, self.data_directory)
-
-        print(this_dir)
+        historical_data_dir = os.path.join(self.util.get_this_dir(), self.data_directory)
         day_id_dirs = [day_id_directory for day_id_directory in os.listdir(historical_data_dir) ]
 
         l_area_data_by_zipcode = []
@@ -205,19 +195,14 @@ class AreaDataStore:
                 my_day_id = int(day_id)
             except:
                 continue
-            # print("day_id=",day_id)
             if not (int(day_id)<int(self.beginning_day_id)) and not (int(day_id)>int(self.ending_day_id)):
-                day_id_directory = historical_data_dir + day_id
                 day_id_directory = os.path.join(historical_data_dir,day_id)
                 json_files = [full_directory for full_directory in os.listdir(day_id_directory) ]
                 for json_file in json_files:
                     zip_code = json_file.split('_')[0]
-                    file_name = day_id_directory + '\\' + json_file
                     file_name = os.path.join(day_id_directory,json_file)
                     file_data = self.util.get_data_from_file(file_name)
                     zip_code_by_day_id_data_object = AreaInformationByZipcode(file_data)
-                    # self.scrub_and_save_file(zip_code_by_day_id_data_object)
-                    # print("zipcode = ", zip_code_by_day_id_data_object.zipcode, zip_code_by_day_id_data_object.extract_day_id)
                     l_area_data_by_zipcode.append((zip_code_by_day_id_data_object))
                     zip_code_set.add(zip_code)
 
@@ -229,13 +214,6 @@ class AreaDataStore:
                     dict_day_data_in_zipcode[zip_code_area_object.extract_day_id] = zip_code_area_object
                     self.area_name_by_zipcode[zip_code] = zip_code_area_object.description
             self.area_data_objects_by_zipcode[zip_code] = dict_day_data_in_zipcode
-
-            # print(self.area_data_objects_by_zipcode[zip_code])
-        # print(self.area_data_objects_by_zipcode.keys())
-        # for key in self.area_data_objects_by_zipcode['90017'].keys():
-        #     print(key)
-        #     object = self.area_data_objects_by_zipcode['90017'][key]
-        #     object.print_internal_directory()
 
     def get_area_info_by_zipcode(self,zip_code):
         '''
@@ -500,13 +478,10 @@ class AreaDisplay:
             else:
                 y_label = "Median Listing Price in Dollars"
 
-
         if graph_option == 2:
-
             y_axis_values = [int(object.active_listings) if len(str(object.active_listings).strip())>0 else 0 for object in
                              self.area_data_store.get_area_info_by_zipcode(zip_code)]
             y_label = "Active Listings in Zipcode"
-
 
         if graph_option == 3:
             y_axis_values = [int(object.median_price_per_sqft)  for object in
