@@ -123,7 +123,7 @@ class Utility:
             print("")
             print(self.center_with_stars("This program requires the module 'matplotlib'"))
             print("")
-            print(            self.center_with_stars(" Please view the link below on how to install: "))
+            print(self.center_with_stars(" Please view the link below on how to install: "))
             print(self.center_with_stars(" https://matplotlib.org/stable/users/installing.html "))
             print("")
             print(self.center_with_stars(" Install the missing module, then run the program again. "))
