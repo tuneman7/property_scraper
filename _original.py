@@ -184,6 +184,142 @@ class AreaDataStore:
         self.beginning_day_id = "20210318"
         self.ending_day_id = "20210606"
 
+    #remove later
+    def smooth_data(self):
+        '''
+        Smooths rugged data by stepping the values from one high to another.
+        :return:
+        '''
+        copy_of_area_objects_by_zipcode = copy.deepcopy(self.area_data_objects_by_zipcode)
+        last_median_price = 0
+        last_list_count = 0
+        last_price_per_square_ft = 0
+        for zip_code in self.area_data_objects_by_zipcode.keys():
+            next_zipcode = True
+            day_ids_in_smoothing_step = []
+            for day_id in self.area_data_objects_by_zipcode[zip_code].keys():
+                print(zip_code,day_id,self.area_data_objects_by_zipcode[zip_code][day_id].median_list_price)
+                try:
+                    i_median_price = int(self.area_data_objects_by_zipcode[zip_code][day_id].median_list_price.replace(",",""))
+                except:
+                    i_median_price = 0
+                try:
+                    i_list_count = int(self.area_data_objects_by_zipcode[zip_code][day_id].active_listings)
+                except:
+                    i_list_count = 0
+                try:
+                    i_price_per_square_ft = int(self.area_data_objects_by_zipcode[zip_code][day_id].median_price_per_sqft)
+                except:
+                    i_price_per_square_ft = 0
+                print("listing count =", i_list_count,zip_code,day_id)
+                if last_median_price !=0 and last_median_price != i_median_price:
+                    #print(day_ids_in_smoothing_step)
+                    #we have a change mark the day_id where the change occured
+                    count_in_smoothing_step = len(day_ids_in_smoothing_step)
+                    price_delta = (i_median_price-last_median_price)
+
+                    listing_delta = (int(i_list_count)-int(last_list_count))
+                    square_feet_delta = (int(i_price_per_square_ft)-int(last_price_per_square_ft))
+
+                    if count_in_smoothing_step ==0:
+                        median_price_smoothing_step = price_delta
+                        listing_count_smoothing_step = listing_delta
+                        price_per_square_ft_smoothing_step = square_feet_delta
+                    else:
+                        median_price_smoothing_step = int(round(price_delta/count_in_smoothing_step))
+                        listing_count_smoothing_step = int(round(listing_delta/count_in_smoothing_step))
+                        price_per_square_ft_smoothing_step = int(round(square_feet_delta/count_in_smoothing_step))
+
+                    if i_median_price<last_median_price:
+                        median_price_smoothing_step = int(round(median_price_smoothing_step*(-1)))
+                    if i_price_per_square_ft<last_price_per_square_ft:
+                        price_per_square_ft_smoothing_step = int(round(price_per_square_ft_smoothing_step*(-1)))
+
+                    if i_list_count<last_list_count:
+                        listing_count_smoothing_step = int(round(listing_count_smoothing_step*(-1)))
+
+                    #now do the smoothing
+                    for day_id_to_smooth in day_ids_in_smoothing_step:
+                        my_object = copy_of_area_objects_by_zipcode[zip_code][day_id_to_smooth]
+                        print(zip_code,day_id_to_smooth,my_object.median_list_price,median_price_smoothing_step,last_median_price,i_median_price,price_delta,count_in_smoothing_step)
+                        original_price = my_object.median_list_price
+                        try:
+                             my_object.median_list_price = "{:,}".format((int(my_object.median_list_price.replace(",","")) + median_price_smoothing_step))
+                        except:
+                            my_object.median_list_price = my_object.median_list_price
+
+                        try:
+                            my_object.median_price_per_sqft = int(my_object.median_price_per_sqft.replace(",","")) + price_per_square_ft_smoothing_step
+                        except:
+                            my_object.median_price_per_sqft + my_object.median_price_per_sqft
+
+                        try:
+                            my_object.active_listings = int(my_object.active_listings) + listing_count_smoothing_step
+                        except:
+                            my_object.active_listings = my_object.active_listings
+
+                        copy_of_area_objects_by_zipcode[zip_code][day_id_to_smooth] = my_object
+
+                        print("smoothed price=",copy_of_area_objects_by_zipcode[zip_code][day_id_to_smooth].median_list_price,"original price=",original_price)
+
+                    # #now clear out the day_ids to smooth
+                    day_ids_in_smoothing_step.clear()
+
+                else:
+                    day_ids_in_smoothing_step.append(self.area_data_objects_by_zipcode[zip_code][day_id].extract_day_id)
+
+                last_median_price = i_median_price
+                last_price_per_square_ft = i_price_per_square_ft
+                last_list_count = i_list_count
+
+        self.save_smoothed_objects(copy_of_area_objects_by_zipcode)
+
+    def save_smoothed_objects(self,copy_of_area_objects_by_zipcode):
+        '''
+        Iterate object collection and save to JSON file.
+        :param copy_of_area_objects_by_zipcode:
+        :return:
+        '''
+        thisdir = os.getcwd()
+
+        for zipcode in copy_of_area_objects_by_zipcode.keys():
+            for day_id in copy_of_area_objects_by_zipcode[zipcode].keys():
+                json_object = copy_of_area_objects_by_zipcode[zipcode][day_id]
+
+                fileToSave = os.path.join( thisdir, 'historical_data_smoothed',  json_object.extract_day_id , '{}_extract_{}.json'.format(json_object.zipcode,json_object.extract_day_id))
+
+                daydirectory = thisdir + '\\historical_data_scrubbed\\' + json_object.extract_day_id + '\\'
+                daydirectory = os.path.join(thisdir,'historical_data_smoothed',  json_object.extract_day_id )
+
+                if not os.path.exists(daydirectory):
+                    os.makedirs(daydirectory)
+                print(fileToSave)
+                with open(fileToSave,"w") as outfile:
+                    json.dump(json_object.__dict__,outfile,indent=4,sort_keys=True)
+
+    #remove later
+    def scrub_and_save_file(self,json_object):
+        '''
+        Used to scrub some data one time.
+        :param json_object:
+        :return:
+        '''
+        if(len(json_object.median_list_price)==3):
+                json_object.median_list_price = json_object.median_list_price + ",000"
+        thisdir = os.getcwd()
+        fileToSave = thisdir + '\\historical_data_scrubbed\\' + json_object.extract_day_id + '\\{}_extract_{}.json'.format(json_object.zipcode,json_object.extract_day_id)
+
+        fileToSave = os.path.join( thisdir, 'historical_data_scrubbed',  json_object.extract_day_id , '{}_extract_{}.json'.format(json_object.zipcode,json_object.extract_day_id))
+
+        daydirectory = thisdir + '\\historical_data_scrubbed\\' + json_object.extract_day_id + '\\'
+        daydirectory = os.path.join(thisdir,'historical_data_scrubbed',  json_object.extract_day_id )
+
+        if not os.path.exists(daydirectory):
+            os.makedirs(daydirectory)
+
+        with open(fileToSave,"w") as outfile:
+            json.dump(json_object.__dict__,outfile,indent=4,sort_keys=True)
+
     def load_area_data_objects(self):
         '''
         Most important method in the class.
@@ -431,195 +567,6 @@ class AreaDisplay:
 
         self.menu_dict = {}
         self.menu_dict['1']="Graph Median Home Price"
-        self.menu_dict['2']="Graph Listings in Market"
-        self.menu_dict['3']="Graph Price Per Squre Foot"
-        self.menu_dict['4']="Graph All"
-
-
-        for option in self.menu_dict.keys():
-            if(int(option)<10):
-                to_print = "{}.  : {}".format(option,self.menu_dict[option])
-            else:
-                to_print = "{}. : {}".format(option,self.menu_dict[option])
-            # side_buffer = (len(to_print)-screen_width)/2
-            to_print = " "*int(20) + to_print
-            print(to_print)
-
-        self.menu_dict['return']='return'
-        self.menu_dict['quit']='quit'
-
-        print(" "*screen_width)
-        print(" "*screen_width)
-
-        print("*"*screen_width)
-        print(self.util.center_with_stars("Please enter the number of the graph to view.",screen_width))
-        print(self.util.center_with_stars("Enter 'return' to return to the Home Menu, 'quit' to exit.",screen_width))
-
-        print("*"*screen_width)
-        print(" "*screen_width)
-
-    def get_area_menu_input(self):
-        '''
-        Captures the users input of the type of graph the want to see.
-        :return:
-        '''
-
-
-        good_input=False
-        while not good_input:
-            good_input = True
-            my_input = input("Please make your selection:").lower()
-            if my_input not in self.menu_dict.keys():
-                self.display_area_data_menu()
-                print("The input your provided '{}' is not a valid menu choice.".format(my_input))
-                good_input = False
-                continue
-
-        if my_input == 'quit':
-            self.util.display_exit_screen()
-            sys.exit()
-
-
-        return my_input, self.menu_dict[my_input]
-
-    def display_graph_based_on_input(self,input_tuple,zip_code):
-        '''
-        Prepares the x and y axis data then feeds it to the graphing class.
-        :param input_tuple:
-        :param zip_code:
-        :return:
-        '''
-        graph_option = int(input_tuple[0])
-        graph_description = input_tuple[1]
-        graph_title = graph_description.replace("Graph","Graph of") + \
-                      " For\n" + self.area_data_store.area_name_by_zipcode[zip_code] + \
-                      ", Zipcode: {}".format(zip_code)
-        # datetime(object.extract_dt.split(",")[0]).date()
-        x_axis_values = [datetime.strptime(object.extract_dt.split(",")[0],'%m/%d/%Y').date()  for object in self.area_data_store.get_area_info_by_zipcode(zip_code)]
-        y_label = ""
-        if graph_option == 1:
-            y_axis_values = [int(object.median_list_price.replace(",", "")) if len(object.median_list_price.replace(",", ""))>0 else 0  for object in
-                             self.area_data_store.get_area_info_by_zipcode(zip_code)]
-            if max(y_axis_values)>1000000:
-                y_label = "Median Listing Price in Millions"
-            else:
-                y_label = "Median Listing Price in Dollars"
-
-
-        if graph_option == 2:
-
-            y_axis_values = [int(object.active_listings) if len(str(object.active_listings).strip())>0 else 0 for object in
-                             self.area_data_store.get_area_info_by_zipcode(zip_code)]
-            y_label = "Active Listings in Zipcode"
-
-
-        if graph_option == 3:
-            y_axis_values = [int(object.median_price_per_sqft)  for object in
-                             self.area_data_store.get_area_info_by_zipcode(zip_code)]
-            y_label = "Median Price Per Sq Ft in Dollars"
-
-        #Simple single lined graphs.
-        if graph_option != 4:
-            area_graph = AreaGraph()
-            area_graph.plot_single_line_graph(x_axis_values, y_axis_values, "Day", y_label, graph_title)
-
-        #Multi_line_graph
-        if graph_option == 4:
-            lgo = []
-            mpgdo = GraphDataObject()
-            mpgdo.label = "Median Price"
-            mpgdo.x_axis_values = x_axis_values
-            mpgdo.y_axis_values = [int(object.median_list_price.replace(",", "")) if len(object.median_list_price.replace(",", ""))>0 else 0  for object in
-                             self.area_data_store.get_area_info_by_zipcode(zip_code)]
-            lgo.append(mpgdo)
-            algdo = GraphDataObject()
-            algdo.label = "Active Listings"
-            algdo.x_axis_values = x_axis_values
-            algdo.y_axis_values = [int(object.active_listings)*200 if len(str(object.active_listings).strip())>0 else 0 for object in
-                             self.area_data_store.get_area_info_by_zipcode(zip_code)]
-            lgo.append(algdo)
-            ppsqftgdo = GraphDataObject()
-            ppsqftgdo.label = "Sqft Price"
-            ppsqftgdo.x_axis_values = x_axis_values
-            ppsqftgdo.y_axis_values = [int(object.median_price_per_sqft)*1000  for object in
-                             self.area_data_store.get_area_info_by_zipcode(zip_code)]
-            lgo.append(ppsqftgdo)
-
-            area_graph = AreaGraph()
-            graph_title = "Multi Line Graph" + \
-                          " For\n" + self.area_data_store.area_name_by_zipcode[zip_code] + \
-                          ", Zipcode: {}".format(zip_code)
-
-            area_graph.plot_multi_line_graph(lgo,graph_title)
-
-
-class AreaGraph:
-    '''
-    Object that renders the graph.
-    '''
-
-    def __init__(self):
-        global GLOBAL_DATA_STORE
-        self.area_data_store = GLOBAL_DATA_STORE
-        self.util = Utility()
-
-    def plot_multi_line_graph(self,list_graph_data_objects,title):
-        '''
-        Plot a multi line graph.
-        :param list_graph_data_objects: list of GraphDataObjects
-        :param title:
-        :return:
-        '''
-        x_axis_values = None
-        for graph_object in list_graph_data_objects:
-            plt.plot(graph_object.x_axis_values,graph_object.y_axis_values,label=graph_object.label)
-            x_axis_values = graph_object.x_axis_values
-        plt.xlabel("Day")
-        plt.ylabel("Value")
-        plt.title(title)
-        # plt.xticks(x_axis_values[::10],rotation=45)
-        plt.xticks(rotation=45)
-        plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
-
-        plt.gcf().subplots_adjust(bottom=0.20)
-        plt.gcf().subplots_adjust(left=0.25)
-        plt.gcf().autofmt_xdate()
-        plt.legend()
-        plt.show()
-
-
-    def plot_single_line_graph(self, x_axis_values, y_axis_values, x_label, y_label, graph_label):
-        '''
-        Plot a single line graph.
-        :param x_axis_values:  list of x values
-        :param y_axis_values: list of y values
-        :param x_label:
-        :param y_label:
-        :param graph_label:
-        :return:
-        '''
-
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
-        plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
-
-        plt.plot(x_axis_values,y_axis_values)
-
-        plt.xlabel(x_label)
-        plt.ylabel(y_label)
-        plt.title(graph_label)
-        # plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
-
-        plt.xticks(rotation=45)
-        plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
-        plt.gcf().subplots_adjust(bottom=0.20)
-        plt.gcf().subplots_adjust(left=0.25)
-        plt.gcf().autofmt_xdate()
-
-        plt.show()
-
-
-
-ict['1']="Graph Median Home Price"
         self.menu_dict['2']="Graph Listings in Market"
         self.menu_dict['3']="Graph Price Per Squre Foot"
         self.menu_dict['4']="Graph All"
