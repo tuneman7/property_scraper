@@ -282,7 +282,7 @@ class AreaDataMenu:
         '''
         self.util.clear()
         self.util.print_header()
-        self.util.center_with_stars("DATA SOURCE MENU",76)
+        print(self.util.center_with_stars("DATA SOURCE MENU",76))
         print("*"*self.util.screen_width)
         print(" "*self.util.screen_width)
 
@@ -304,7 +304,7 @@ class AreaDataMenu:
         print(" "*self.util.screen_width)
 
         print("*"*self.util.screen_width)
-        print(self.util.center_with_stars("Select what data you would like to use.",self.util.screen_width))
+        print(self.util.center_with_stars("Select what data you would like to use. ",self.util.screen_width))
 
         print("*"*self.util.screen_width)
         print(" "*self.util.screen_width)
@@ -326,13 +326,9 @@ class AreaDataMenu:
         max_len = len(self.area_data_store.area_name_by_zipcode[max_key])
         screen_width = 76
         self.util.print_header()
+        title1 = "HOME MENU "
+        print(self.util.center_with_stars(title1))
         print("*"*screen_width)
-        title1 = "*                            HOME MENU                                    *"
-        print(title1)
-
-        print("*"*screen_width)
-        print(" "*screen_width)
-
         print(" "*screen_width)
 
         int_menu = 1
@@ -349,8 +345,7 @@ class AreaDataMenu:
         print(" "*screen_width)
 
         print("*"*screen_width)
-        title1 = "*  Enter a number corresponding to the zipcode you wish to view or 'quit' *"
-        print(title1)
+        print(self.util.center_with_stars("Enter a number corresponding to the zipcode you wish to view or 'quit'"))
 
         print("*"*screen_width)
         print(" "*screen_width)
@@ -452,7 +447,7 @@ class AreaDisplay:
         print(" "*screen_width)
 
         print("*"*screen_width)
-        print(self.util.center_with_stars("Please enter the number of the graph to view.",screen_width))
+        print(self.util.center_with_stars("Please enter the number of the graph to view. ",screen_width))
         print(self.util.center_with_stars("Enter 'return' to return to the Home Menu, 'quit' to exit.",screen_width))
 
         print("*"*screen_width)
