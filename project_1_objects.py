@@ -134,7 +134,7 @@ class Utility:
 
 class AreaInformationByZipcode:
     '''
-    Simple Class representation of json, probably unnecssary, but we will see.
+    Simple Class representation of json, probably unnecessary, but we will see.
     '''
 
     def __init__(self,**kwargs):
