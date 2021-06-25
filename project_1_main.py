@@ -31,22 +31,3 @@ def main():
                 area_display_object.display_graph_based_on_input(area_display_option,zip_code_to_display)
 
 main()
-a_menu()
-        zip_code_to_display = area_data_menu.get_main_menu_input()
-        area_display_object = AreaDisplay(zip_code_to_display)
-
-        return_to_main_menu = False
-        while not return_to_main_menu:
-            area_display_object.display_area_data_menu()
-            area_display_option = area_display_object.get_area_menu_input()
-
-            if area_display_option[0] == 'return':
-                return_to_main_menu = True
-                break
-            else:
-                # print(area_display_option)
-                area_display_object.display_graph_based_on_input(area_display_option,zip_code_to_display)
-
-
-
-main()
