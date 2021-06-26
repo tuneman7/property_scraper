@@ -5,12 +5,10 @@ from project_1_objects import Utility
 def main():
 
     #This will exit us out if we're not cool
-    util = Utility()
-    util.do_dependency_check()
-
-    util.display_splash_screen()
 
     area_data_menu = AreaDataMenu()
+    area_data_menu.do_dependency_check()
+    area_data_menu.display_splash_screen()
     stil_running = True
     while stil_running:
 

@@ -126,7 +126,7 @@ class Utility:
             print("*"*self.screen_width)
             sys.exit()
 
-class AreaInformationByZipcode:
+class AreaInformationByZipcode(Utility):
     '''
     Simple Class representation of json, probably unnecessary, but we will see.
     '''
@@ -136,6 +136,7 @@ class AreaInformationByZipcode:
         self.__dict__.update((k, v) for k, v in kwargs.items() if k in allowed_keys)
 
     def __init__(self, json_string):
+        super().__init__()
         '''
         Load it up
         :param json_string:
@@ -150,7 +151,7 @@ class AreaInformationByZipcode:
         for k,v in self.__dict__.items():
             print("{} is \"{}\"".format(k,v))
 
-class AreaDataStore:
+class AreaDataStore(Utility):
     '''
     Primary Data object with different internal structures used by all classes.
     This is loaded from disk once at the beginning then re-used throughout.
@@ -162,6 +163,7 @@ class AreaDataStore:
     rough_data_dir = "historical_data_original_do_not_delete"
 
     def __init__(self,use_rough_data=False):
+        super().__init__()
         '''
         Initializer which sets up iternal objects.
         loads either rough un-smoothed data, or smoothed data.
@@ -173,7 +175,6 @@ class AreaDataStore:
             self.data_directory = AreaDataStore.smooth_data_dir
         self.area_data_objects_by_zipcode = {}
         self.area_name_by_zipcode = {}
-        self.util = Utility()
         self.load_area_data_objects()
         self.beginning_day_id = "20210318"
         self.ending_day_id = "20210606"
@@ -184,7 +185,7 @@ class AreaDataStore:
         Loads all of the data objects into nested dictionaries for consumption by the other classes.
         :return:
         '''
-        historical_data_dir = os.path.join(self.util.get_this_dir(), self.data_directory)
+        historical_data_dir = os.path.join(self.get_this_dir(), self.data_directory)
         day_id_dirs = [day_id_directory for day_id_directory in os.listdir(historical_data_dir) ]
 
         l_area_data_by_zipcode = []
@@ -201,7 +202,7 @@ class AreaDataStore:
                 for json_file in json_files:
                     zip_code = json_file.split('_')[0]
                     file_name = os.path.join(day_id_directory,json_file)
-                    file_data = self.util.get_data_from_file(file_name)
+                    file_data = self.get_data_from_file(file_name)
                     zip_code_by_day_id_data_object = AreaInformationByZipcode(file_data)
                     l_area_data_by_zipcode.append((zip_code_by_day_id_data_object))
                     zip_code_set.add(zip_code)
@@ -210,7 +211,6 @@ class AreaDataStore:
             dict_day_data_in_zipcode = {}
             for zip_code_area_object in l_area_data_by_zipcode:
                 if zip_code_area_object.zipcode ==zip_code:
-                    # print(zip_code, zip_code_area_object.zipcode, zip_code_area_object.extract_day_id)
                     dict_day_data_in_zipcode[zip_code_area_object.extract_day_id] = zip_code_area_object
                     self.area_name_by_zipcode[zip_code] = zip_code_area_object.description
             self.area_data_objects_by_zipcode[zip_code] = dict_day_data_in_zipcode
@@ -224,19 +224,18 @@ class AreaDataStore:
         l_return = [self.area_data_objects_by_zipcode[zip_code][key] for key in sorted(self.area_data_objects_by_zipcode[zip_code].keys())]
         return l_return
 
-class AreaDataMenu:
+class AreaDataMenu(Utility):
     '''
     The opening menu of the program.
     consumes the AreaDataStore()
     '''
 
     def __init__(self):
+        super().__init__()
         '''
         Initializer which prompts user for what data set to use
         sets that set to global.
         '''
-        self.util = Utility()
-        # self.display_area_data_menu()
         self.first_time_display=True
 
         data_store_selection = self.display_data_source_menu()
@@ -251,18 +250,16 @@ class AreaDataMenu:
         self.area_data_store = GLOBAL_DATA_STORE
         self.display_area_data_menu()
 
-
-
     def display_data_source_menu(self):
         '''
         Displays the data source menu.
         :return:
         '''
-        self.util.clear()
-        self.util.print_header()
-        print(self.util.center_with_stars("DATA SOURCE MENU",76))
-        print("*"*self.util.screen_width)
-        print(" "*self.util.screen_width)
+        self.clear()
+        self.print_header()
+        print(self.center_with_stars("DATA SOURCE MENU",76))
+        print("*"*self.screen_width)
+        print(" "*self.screen_width)
 
         self.menu_dict = {}
         self.menu_dict['1']="Smoothed Data (default)"
@@ -278,14 +275,14 @@ class AreaDataMenu:
             to_print = " "*int(20) + to_print
             print(to_print)
 
-        print(" "*self.util.screen_width)
-        print(" "*self.util.screen_width)
+        print(" "*self.screen_width)
+        print(" "*self.screen_width)
 
-        print("*"*self.util.screen_width)
-        print(self.util.center_with_stars("Select what data you would like to use. ",self.util.screen_width))
+        print("*"*self.screen_width)
+        print(self.center_with_stars("Select what data you would like to use. ",self.screen_width))
 
-        print("*"*self.util.screen_width)
-        print(" "*self.util.screen_width)
+        print("*"*self.screen_width)
+        print(" "*self.screen_width)
 
         data_type_selection = input("Please make your selection:")
         while data_type_selection not in self.menu_dict.keys():
@@ -299,13 +296,13 @@ class AreaDataMenu:
         Displays all zipcodes and their names.
         :return:
         '''
-        self.util.clear()
+        self.clear()
         max_key = max(self.area_data_store.area_name_by_zipcode, key=lambda k: len(self.area_data_store.area_name_by_zipcode[k]))
         max_len = len(self.area_data_store.area_name_by_zipcode[max_key])
         screen_width = 76
-        self.util.print_header()
+        self.print_header()
         title1 = "HOME MENU "
-        print(self.util.center_with_stars(title1))
+        print(self.center_with_stars(title1))
         print("*"*screen_width)
         print(" "*screen_width)
 
@@ -323,7 +320,7 @@ class AreaDataMenu:
         print(" "*screen_width)
 
         print("*"*screen_width)
-        print(self.util.center_with_stars("Enter a number corresponding to the zipcode you wish to view or 'quit'"))
+        print(self.center_with_stars("Enter a number corresponding to the zipcode you wish to view or 'quit'"))
 
         print("*"*screen_width)
         print(" "*screen_width)
@@ -348,7 +345,7 @@ class AreaDataMenu:
             else:
                 if my_input == "quit":
                     # print("Quitting -- goodbye.")
-                    self.util.display_exit_screen()
+                    self.display_exit_screen()
                     sys.exit()
                 else:
                     good_input = True
@@ -364,13 +361,14 @@ class GraphDataObject:
         self.y_axis_values = None
         self.label = None
 
-class AreaDisplay:
+class AreaDisplay(Utility):
     '''
     Handles options for what a user can view about a zipcode.
     '''
 
 
     def __init__(self,input_zip_code):
+        super().__init__()
         '''
         Initializer
         :param input_zip_code: zip code to view.
@@ -379,24 +377,23 @@ class AreaDisplay:
         self.area_data_store = GLOBAL_DATA_STORE
         # self.area_data_store = AreaDataStore()
         self.zip_code = input_zip_code
-        self.util = Utility()
 
     def display_area_data_menu(self):
         '''
         Display options about a specific zipcode.
         :return:
         '''
-        self.util.clear()
+        self.clear()
         max_key = max(self.area_data_store.area_name_by_zipcode, key=lambda k: len(self.area_data_store.area_name_by_zipcode[k]))
         max_len = len(self.area_data_store.area_name_by_zipcode[max_key])
         screen_width = 76
 
-        self.util.print_header()
+        self.print_header()
 
-        print(self.util.center_with_stars("AREA DETAILS MENU ".format(self.zip_code),screen_width))
+        print(self.center_with_stars("AREA DETAILS MENU ".format(self.zip_code),screen_width))
 
-        print(self.util.center_with_stars("You have selected zip code {}".format(self.zip_code),screen_width))
-        print(self.util.center_with_stars("Area Name: {}".format(self.area_data_store.area_name_by_zipcode[self.zip_code]),screen_width))
+        print(self.center_with_stars("You have selected zip code {}".format(self.zip_code),screen_width))
+        print(self.center_with_stars("Area Name: {}".format(self.area_data_store.area_name_by_zipcode[self.zip_code]),screen_width))
 
         print("*"*screen_width)
         print(" "*screen_width)
@@ -425,8 +422,8 @@ class AreaDisplay:
         print(" "*screen_width)
 
         print("*"*screen_width)
-        print(self.util.center_with_stars("Please enter the number of the graph to view. ",screen_width))
-        print(self.util.center_with_stars("Enter 'return' to return to the Home Menu, 'quit' to exit.",screen_width))
+        print(self.center_with_stars("Please enter the number of the graph to view. ",screen_width))
+        print(self.center_with_stars("Enter 'return' to return to the Home Menu, 'quit' to exit.",screen_width))
 
         print("*"*screen_width)
         print(" "*screen_width)
@@ -449,7 +446,7 @@ class AreaDisplay:
                 continue
 
         if my_input == 'quit':
-            self.util.display_exit_screen()
+            self.display_exit_screen()
             sys.exit()
 
 
@@ -523,7 +520,7 @@ class AreaDisplay:
             area_graph.plot_multi_line_graph(lgo,graph_title)
 
 
-class AreaGraph:
+class AreaGraph(Utility):
     '''
     Object that renders the graph.
     '''
@@ -531,7 +528,6 @@ class AreaGraph:
     def __init__(self):
         global GLOBAL_DATA_STORE
         self.area_data_store = GLOBAL_DATA_STORE
-        self.util = Utility()
 
     def plot_multi_line_graph(self,list_graph_data_objects,title):
         '''
