@@ -547,10 +547,8 @@ class AreaGraph:
         plt.xlabel("Day")
         plt.ylabel("Value")
         plt.title(title)
-        # plt.xticks(x_axis_values[::10],rotation=45)
         plt.xticks(rotation=45)
         plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
-
         plt.gcf().subplots_adjust(bottom=0.20)
         plt.gcf().subplots_adjust(left=0.25)
         plt.gcf().autofmt_xdate()
@@ -568,22 +566,16 @@ class AreaGraph:
         :param graph_label:
         :return:
         '''
-
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
         plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
-
         plt.plot(x_axis_values,y_axis_values)
-
         plt.xlabel(x_label)
         plt.ylabel(y_label)
         plt.title(graph_label)
-        # plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
-
         plt.xticks(rotation=45)
         plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
         plt.gcf().subplots_adjust(bottom=0.20)
         plt.gcf().subplots_adjust(left=0.25)
         plt.gcf().autofmt_xdate()
-
         plt.show()
 
